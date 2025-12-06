@@ -1,5 +1,17 @@
 {
-    "runtime.version": "5.4",
-    "workspace.checkThirdParty": false,
-    "hint.enable": true
+  // 关闭第三方库检测的弹窗（可选）
+  "workspace.checkThirdParty": false,
+
+  // 告诉 LuaLS，我们的“库”路径
+  "workspace.library": [
+    "./wezterm-types/lua"
+  ],
+
+  // 建议开启
+  "diagnostics.globals": [
+    "wezterm",
+    "Config",
+    "Wezterm"
+  ]
 }
+

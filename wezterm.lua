@@ -1,21 +1,31 @@
-local Config = require('config')
-
-require('utils.backdrops')
-   -- :set_focus('#000000')
-   -- :set_images_dir(require('wezterm').home_dir .. '/Pictures/Wallpapers/')
-   :set_images()
-   :random()
-
-require('events.left-status').setup()
-require('events.right-status').setup({ date_format = '%a %H:%M:%S' })
-require('events.tab-title').setup({ hide_active_tab_unseen = false, unseen_icon = 'numbered_box' })
-require('events.new-tab-button').setup()
-require('events.gui-startup').setup()
-
-return Config:init()
-   :append(require('config.appearance'))
-   :append(require('config.bindings'))
-   :append(require('config.domains'))
-   :append(require('config.fonts'))
-   :append(require('config.general'))
-   :append(require('config.launch')).options
+local wezterm = require("wezterm") ---@type Wezterm
+local act = wezterm.action
+local config = wezterm.config_builder() ---@type Config
+config.debug_key_events = false
+-- 基础样式配置
+require("config.appearance").setup(config)
+-- 快捷键配置
+require("config.bindings").setup(config)
+-- SSH domains
+require("config.domains").setup(config)
+-- Plugins
+require("config.plugins.bar").setup(config)
+require("config.plugins.quick_domains").setup(config)
+-- require("config.plugins.modal").setup(config)
+return config
+-- =========== Command Palette 扩展 ===========
+-- wezterm.on("augment-command-palette", function(window, pane)
+--     return {{
+--         brief = "Rename tab",
+--         icon = "md_rename_box",
+--         action = act.PromptInputLine({
+--             description = "Enter new name for tab",
+--             initial_value = "My Tab Name",
+--             action = wezterm.action_callback(function(window, pane, line)
+--                 if line then
+--                     window:active_tab():set_title(line)
+--                 end
+--             end)
+--         })
+--     }}
+-- end)
