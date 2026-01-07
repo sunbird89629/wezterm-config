@@ -10,6 +10,8 @@ config.check_for_updates_interval_seconds = 86400
 require("config.appearance").setup(config)
 -- Window focus styling
 require("events.window-focus").setup()
+-- Set input method when a new window is first focused
+require("events.input-method").setup()
 -- 快捷键配置
 require("config.bindings").setup(config)
 -- SSH domains
