@@ -6,6 +6,17 @@ config.initial_rows = 25
 config.initial_cols = 98
 config.check_for_updates = true
 config.check_for_updates_interval_seconds = 86400
+
+local base_path = os.getenv("PATH") or ""
+local extra_path = "/opt/homebrew/bin"
+local merged_path = base_path
+if not base_path:find(extra_path, 1, true) then
+    merged_path = base_path .. ":" .. extra_path
+end
+config.set_environment_variables = {
+    PATH = merged_path
+}
+
 -- 基础样式配置
 require("config.appearance").setup(config)
 -- Window focus styling
