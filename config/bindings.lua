@@ -85,16 +85,6 @@ function M.setup(config)
                 args = {'/opt/homebrew/bin/yazi'}
             }), pane)
         end)
-    }, {
-        key = "N",
-        mods = "CMD|SHIFT",
-        action = wezterm.action_callback(function(win, pane)
-            local cwd = pane_cwd_path(pane)
-            win:perform_action(act.SpawnCommandInNewWindow({
-                cwd = cwd,
-                args = {'vim'}
-            }), pane)
-        end)
     }}
 end
 return M
