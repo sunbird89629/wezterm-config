@@ -28,7 +28,8 @@ require("config.bindings").setup(config)
 -- SSH domains
 require("config.domains").setup(config)
 -- Plugins
-require("config.plugins.bar").setup(config)
+-- require("config.plugins.bar").setup(config)
+require("config.plugins.tabline").setup(config)
 require("config.plugins.quick_domains").setup(config)
 require("config.plugins.ai_helper").setup(config)
 require("config.plugins.temp_edit").setup(config)

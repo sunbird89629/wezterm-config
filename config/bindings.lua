@@ -56,10 +56,6 @@ function M.setup(config)
         mods = "NONE",
         action = "ActivateCopyMode"
     }, {
-        key = "F12",
-        mods = "NONE",
-        action = act.ShowDebugOverlay
-    }, {
         key = "[",
         mods = "CMD",
         action = act.ActivateTabRelative(-1)
