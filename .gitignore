@@ -3,3 +3,8 @@
 /lua_modules
 /.luarocks
 .DS_Store
+
+# Temporary files
+.crush/
+firebase-debug.log
+tmp/

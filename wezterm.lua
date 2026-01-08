@@ -2,8 +2,8 @@ local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
 config.debug_key_events = false
-config.initial_rows = 25
-config.initial_cols = 98
+config.initial_rows = 45
+config.initial_cols = 160
 config.check_for_updates = true
 config.check_for_updates_interval_seconds = 86400
 
