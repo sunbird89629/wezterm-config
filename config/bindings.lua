@@ -29,6 +29,7 @@ local function pane_cwd_path(pane)
 end
 
 function M.setup(config)
+    config.leader = { key = "l", mods = "CMD", timeout_milliseconds = 1000 }
     local act = wezterm.action
     config.keys = { -- misc / useful
     {
