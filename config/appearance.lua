@@ -35,7 +35,9 @@ end
 
 function config_tab_bar_colors(config)
     -- config.use_fancy_tab_bar = false
+    config.underline_thickness = "2px"
     config.colors = {
+        split = "#5d7cff",
         tab_bar = {
             background = "#0c0f1a", -- bar background
             active_tab = {
