@@ -9,13 +9,28 @@ function M.setup(config)
             icons_enabled = true,
             theme = 'Catppuccin Mocha',
             tabs_enabled = true,
-            section_separators = { left = '', right = '' },
-            component_separators = { left = '', right = '' },
-            tab_separators = { left = '', right = '' },
+            section_separators = {
+                left = '',
+                right = ''
+            },
+            component_separators = {
+                left = '',
+                right = ''
+            },
+            tab_separators = {
+                left = '',
+                right = ''
+            },
             -- 覆盖主题颜色以增强区分度
             theme_overrides = {
-                tab_active = { fg = '#11111b', bg = '#fab387' }, -- 活动标签：橙色背景，深色文字
-                tab_inactive = { fg = '#cdd6f4', bg = '#313244' }, -- 非活动标签：深灰色背景，浅色文字
+                tab_active = {
+                    fg = '#11111b',
+                    bg = '#fab387'
+                }, -- 活动标签：橙色背景，深色文字
+                tab_inactive = {
+                    fg = '#cdd6f4',
+                    bg = '#313244'
+                } -- 非活动标签：深灰色背景，浅色文字
             }
         },
         sections = {
