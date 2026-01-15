@@ -28,6 +28,40 @@ local function pane_cwd_path(pane)
     return nil
 end
 
+local function copy_last_command_output(window, pane)
+    local zones = pane:get_semantic_zones()
+    if not zones then
+        return
+    end
+
+    local last_input_idx = nil
+    -- Find the last Input zone
+    for i = #zones, 1, -1 do
+        if zones[i].semantic_type == 'Input' then
+            last_input_idx = i
+            break
+        end
+    end
+
+    if not last_input_idx then
+        window:toast_notification('WezTerm', 'No command found', nil, 2000)
+        return
+    end
+
+    local text = pane:get_text_from_semantic_zone(zones[last_input_idx])
+
+    -- Check if there is output following it
+    if last_input_idx < #zones then
+        local next_zone = zones[last_input_idx + 1]
+        if next_zone.semantic_type == 'Output' then
+            text = text .. pane:get_text_from_semantic_zone(next_zone)
+        end
+    end
+
+    window:copy_to_clipboard(text, 'Clipboard')
+    window:toast_notification('WezTerm', 'Copied last command and output', nil, 2000)
+end
+
 function M.setup(config)
     config.leader = { key = "l", mods = "CMD", timeout_milliseconds = 1000 }
     local act = wezterm.action
@@ -82,6 +116,10 @@ function M.setup(config)
                 args = {'/opt/homebrew/bin/yazi'}
             }), pane)
         end)
+    }, {
+        key = "L",
+        mods = "CMD|SHIFT",
+        action = wezterm.action_callback(copy_last_command_output)
     }}
 end
 return M
