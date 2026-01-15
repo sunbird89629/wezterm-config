@@ -8,6 +8,8 @@ local lib = wezterm.plugin.require("https://github.com/chrisgve/lib.wezterm")
 local time = wezterm.time
 local act = wezterm.action
 local mux = wezterm.mux
+local io = require("io")
+local os = require("os")
 
 --- Execute a callback periodically.
 --- @param interval number Seconds between calls
@@ -69,6 +71,23 @@ local function on_pane_exit(window, pane)
     end
 end
 
+-- Debugging: Print keys in lib to see what is available
+local function log_table_for_debug(target)
+    if target then
+        for k, v in pairs(target) do
+            wezterm.log_error("lib key: " .. k .. " -> " .. tostring(v))
+            if type(v) == "table" then
+                for k2, v2 in pairs(v) do
+                    wezterm.log_error("  " .. k .. "." .. k2 .. " -> " .. tostring(v2))
+                end
+            end
+        end
+    else
+        wezterm.log_error("target is nil")
+    end
+
+end
+
 local function trigger_nvim_edit()
     wezterm.log_error("################### trigger_nvim_edit ##################")
     lib.file_io.write_file(temp_file_name, "")
@@ -77,18 +96,6 @@ local function trigger_nvim_edit()
     })
 
     local pane_id = pane:pane_id()
-
-    -- Debugging: Print keys in lib to see what is available
-    -- if lib then
-    --     for k, v in pairs(lib) do
-    --         wezterm.log_error("lib key: " .. k .. " -> " .. tostring(v))
-    --         if type(v) == "table" then
-    --             for k2, v2 in pairs(v) do
-    --                 wezterm.log_error("  " .. k .. "." .. k2 .. " -> " .. tostring(v2))
-    --             end
-    --         end
-    --     end
-    -- end
 
     set_interval(0.2, function()
         wezterm.log_error("pane check running.....")
@@ -103,6 +110,111 @@ local function trigger_nvim_edit()
     wezterm.log_error("###################################################")
 end
 
+-- Helper to write content to a file
+local function write_file(path, content)
+    local f = io.open(path, "w")
+    if f then
+        f:write(content)
+        f:close()
+    else
+        wezterm.log_error("Failed to write to " .. path)
+    end
+end
+
+-- Helper to read content from a file
+local function read_file(path)
+    local f = io.open(path, "r")
+    if f then
+        local content = f:read("*a")
+        f:close()
+        return content
+    end
+    return nil
+end
+
+local function trigger_cmd_edit(window, pane)
+    local original_pane = pane
+    local original_pane_id = original_pane:pane_id()
+
+    -- Generate a unique temp file path
+    local temp_file_path = "/tmp/wezterm_edit_" .. tostring(original_pane_id) .. "_" .. os.time() .. ".txt"
+
+    -- 1. Grab text
+    local initial_text = ""
+    local cursor = original_pane:get_cursor_position()
+    local zones = original_pane:get_semantic_zones()
+
+    -- wezterm.log_error("cursor>>")
+    -- log_table_for_debug(cursor)
+    -- wezterm.log_error("zones>>")
+    -- log_table_for_debug(zones)
+
+    local found_prompt = false
+    if zones then
+        for i = #zones, 1, -1 do
+            -- Find the last prompt that is at or above the cursor
+            if zones[i].semantic_type == "Prompt" and zones[i].start_y <= cursor.y then
+                local prompt_end_y = zones[i].end_y
+                local prompt_end_x = zones[i].end_x
+
+                -- Capture text from the end of the prompt to a reasonable limit (cursor row + 10)
+                initial_text = original_pane:get_text_from_region(prompt_end_y, prompt_end_x, cursor.y + 10, 0)
+                found_prompt = true
+                break
+            end
+        end
+    end
+
+    if not found_prompt then
+        -- Fallback: Get text of the current line
+        initial_text = original_pane:get_lines_as_text(cursor.y, 1)
+        -- Simple heuristic to strip common prompts if possible, or just take the line
+        -- initial_text = initial_text:gsub("^.*[$%%>]%s*", "")
+    end
+
+    wezterm.log_error("initial_text>>")
+    wezterm.log_error(initial_text)
+
+    -- Write initial text to temp file
+    write_file(temp_file_path, initial_text)
+
+    -- 2. Spawn a new window running neovim
+    -- Use zsh -lic to ensure user config/path is loaded for nvim
+    local _, new_pane, _ = mux.spawn_window({
+        args = {"/bin/zsh", "-lic", "nvim " .. temp_file_path}
+    })
+    local new_pane_id = new_pane:pane_id()
+
+    -- 3. Poll for the editor pane to close
+    set_interval(0.5, function()
+        local ok, _ = pcall(mux.get_pane, new_pane_id)
+        if not ok then
+            -- The new pane is dead (editor exited)
+            local content = read_file(temp_file_path)
+            if content then
+                -- Trim the trailing newline that editors typically add
+                content = content:gsub("[\n\r]+$", "")
+
+                -- Send the edited text back to the original pane
+                local p_ok, live_orig = pcall(mux.get_pane, original_pane_id)
+                if p_ok and live_orig then
+                    -- Clear the current line and paste the new content
+                    -- \x01 (Ctrl-A) moves to start of line
+                    -- \x15 (Ctrl-U) clears to start of line (bash/zsh)
+                    -- \x0b (Ctrl-K) clears to end of line
+                    -- sending Ctrl-U and Ctrl-K is safer to clear the whole line
+                    live_orig:send_text("\x15\x0b" .. content)
+                end
+            end
+
+            -- Cleanup
+            os.remove(temp_file_path)
+            return false -- Stop polling
+        end
+        return true -- Continue polling
+    end)
+end
+
 local M = {}
 
 function M.setup(config)
@@ -115,6 +227,11 @@ function M.setup(config)
         mods = "CMD|SHIFT",
         -- action = wezterm.action_callback(trigger_edit)
         action = wezterm.action_callback(trigger_nvim_edit)
+    })
+    table.insert(config.keys, {
+        key = "e",
+        mods = "CMD",
+        action = wezterm.action_callback(trigger_cmd_edit)
     })
 end
 
