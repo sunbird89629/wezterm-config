@@ -4,7 +4,7 @@ local config = wezterm.config_builder() ---@type Config
 config.debug_key_events = false
 config.initial_rows = 45
 config.initial_cols = 160
-config.check_for_updates = true
+config.check_for_updates = false
 config.check_for_updates_interval_seconds = 86400
 
 local base_path = os.getenv("PATH") or ""
