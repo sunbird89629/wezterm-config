@@ -98,7 +98,7 @@ local function trigger_nvim_edit()
     local pane_id = pane:pane_id()
 
     set_interval(0.2, function()
-        wezterm.log_error("pane check running.....")
+        -- wezterm.log_error("pane check running.....")
         local ok, live_pane = pcall(mux.get_pane, pane_id)
         if ok and live_pane then
             return true
@@ -132,6 +132,18 @@ local function read_file(path)
     return nil
 end
 
+-- If you have shell integration configured, returns the zone around
+-- the current cursor position
+local function get_zone_around_cursor(pane)
+    local cursor = pane:get_cursor_position()
+    -- using x-1 here because the cursor may be one cell outside the zone
+    local zone = pane:get_semantic_zone_at(cursor.x - 1, cursor.y)
+    if zone then
+        return pane:get_text_from_semantic_zone(zone)
+    end
+    return nil
+end
+
 local function trigger_cmd_edit(window, pane)
     local original_pane = pane
     local original_pane_id = original_pane:pane_id()
@@ -143,34 +155,53 @@ local function trigger_cmd_edit(window, pane)
     local initial_text = ""
     local cursor = original_pane:get_cursor_position()
     local zones = original_pane:get_semantic_zones()
+    -- if zones then
+    --     for index, zone in ipairs(zones) do
+    --         wezterm.log_error("zones.index>>>>>>>>>>>>>>>>>" .. index)
+    --         wezterm.log_error(wezterm.to_string(zone))
+    --         wezterm.log_error(original_pane:get_text_from_semantic_zone(zone))
+    --         -- original_pane:get_text_from_region()
+    --     end
+    -- end
 
     -- wezterm.log_error("cursor>>")
     -- log_table_for_debug(cursor)
     -- wezterm.log_error("zones>>")
-    -- log_table_for_debug(zones)
+    -- wezterm.log_error(wezterm.to_string(zones))
 
     local found_prompt = false
-    if zones then
-        for i = #zones, 1, -1 do
-            -- Find the last prompt that is at or above the cursor
-            if zones[i].semantic_type == "Prompt" and zones[i].start_y <= cursor.y then
-                local prompt_end_y = zones[i].end_y
-                local prompt_end_x = zones[i].end_x
+    -- if zones then
+    --     -- for i = #zones, 1, -1 do
+    --     -- Find the last prompt that is at or above the cursor
+    --     -- if zones[i].semantic_type == "Prompt" and zones[i].start_y <= cursor.y then
+    --     --     local prompt_end_y = zones[i].end_y
+    --     --     local prompt_end_x = zones[i].end_x
 
-                -- Capture text from the end of the prompt to a reasonable limit (cursor row + 10)
-                initial_text = original_pane:get_text_from_region(prompt_end_y, prompt_end_x, cursor.y + 10, 0)
-                found_prompt = true
-                break
-            end
-        end
-    end
+    --     --     -- Safety check: prevent capturing excessive amount of text which might cause crashes
+    --     --     if (cursor.y - prompt_end_y) > 1000 then
+    --     --         wezterm.log_warn("Prompt too far back, limiting capture to last 1000 lines to prevent crash")
+    --     --         prompt_end_y = cursor.y - 1000
+    --     --         prompt_end_x = 0
+    --     --     end
 
-    if not found_prompt then
-        -- Fallback: Get text of the current line
-        initial_text = original_pane:get_lines_as_text(cursor.y, 1)
-        -- Simple heuristic to strip common prompts if possible, or just take the line
-        -- initial_text = initial_text:gsub("^.*[$%%>]%s*", "")
-    end
+    --     --     -- Capture text from the end of the prompt to a reasonable limit (cursor row + 10)
+    --     --     initial_text = original_pane:get_text_from_region(prompt_end_y, prompt_end_x, cursor.y + 10, 0)
+    --     --     found_prompt = true
+    --     --     break
+    --     -- end
+    --     -- wezterm.log_error("zones:" .. i)
+    --     -- wezterm.log_error(wezterm.to_string(zones[i]))
+    --     -- end
+    -- end
+
+    -- if not found_prompt then
+    --     -- Fallback: Get text of the current line
+    --     initial_text = original_pane:get_lines_as_text(1)
+    --     -- Simple heuristic to strip common prompts if possible, or just take the line
+    --     -- initial_text = initial_text:gsub("^.*[$%%>]%s*", "")
+    -- end
+
+    initial_text = get_zone_around_cursor(original_pane)
 
     wezterm.log_error("initial_text>>")
     wezterm.log_error(initial_text)

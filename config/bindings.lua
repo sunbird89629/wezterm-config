@@ -54,7 +54,14 @@ local function copy_last_command_output(window, pane)
     if last_input_idx < #zones then
         local next_zone = zones[last_input_idx + 1]
         if next_zone.semantic_type == 'Output' then
-            text = text .. pane:get_text_from_semantic_zone(next_zone)
+            local line_count = next_zone.end_y - next_zone.start_y
+            if line_count > 5000 then
+                 wezterm.log_warn("Output too large ("..line_count.." lines), truncating copy to last 5000 lines to avoid crash.")
+                 local safe_start_y = next_zone.end_y - 5000
+                 text = text .. "\n...[Output truncated]...\n" .. pane:get_text_from_region(safe_start_y, 0, next_zone.end_y, next_zone.end_x)
+            else
+                 text = text .. pane:get_text_from_semantic_zone(next_zone)
+            end
         end
     end
 
