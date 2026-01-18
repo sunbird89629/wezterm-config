@@ -127,6 +127,12 @@ function M.setup(config)
         key = "L",
         mods = "CMD|SHIFT",
         action = wezterm.action_callback(copy_last_command_output)
-    }}
+    },
+    -- Send standard navigation keys for Cmd+Arrows
+    { key = "LeftArrow", mods = "CMD", action = act.SendKey({ key = "Home" }) },
+    { key = "RightArrow", mods = "CMD", action = act.SendKey({ key = "End" }) },
+    { key = "UpArrow", mods = "CMD", action = act.SendKey({ key = "PageUp" }) },
+    { key = "DownArrow", mods = "CMD", action = act.SendKey({ key = "PageDown" }) },
+    }
 end
 return M
