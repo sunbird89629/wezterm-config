@@ -98,7 +98,6 @@ local function log_table_for_debug(target)
 end
 
 local function trigger_nvim_edit()
-    wezterm.log_error("################### trigger_nvim_edit ##################")
     lib.file_io.write_file(temp_file_name, "")
     local _, pane, window = mux.spawn_window({
         args = {"/bin/zsh", "-lic", "nvim " .. temp_file_name}
@@ -118,7 +117,6 @@ local function trigger_nvim_edit()
             return false
         end
     end)
-    wezterm.log_error("###################################################")
 end
 
 -- Helper to write content to a file
