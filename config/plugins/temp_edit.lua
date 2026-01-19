@@ -40,29 +40,32 @@ local function set_window_override(window, k, v)
     window:set_config_overrides(o)
 end
 
--- Copy text to clipboard via GUI window if available; fallback to pbcopy.
--- local function copy_file_to_clipboard(window, text)
---     local gui_window = nil
---     if window and window.gui_window then
---         local ok, gw = pcall(function()
---             return window:gui_window()
---         end)
---         if ok then
---             gui_window = gw
---         end
---     end
+local function pane_cwd_path(pane)
+    local cwd = pane:get_current_working_dir()
+    if not cwd then
+        return nil
+    end
 
---     if gui_window then
---         gui_window:copy_to_clipboard(text)
---         return true
---     end
+    -- 新版可能直接是 Url 对象
+    if type(cwd) == 'userdata' or type(cwd) == 'table' then
+        return cwd.file_path
+    end
 
---     local ok, _, stderr = wezterm.run_child_process({"/bin/sh", "-c", "/usr/bin/pbcopy < " .. tmp_file_path})
---     if not ok then
---         wezterm.log_error("Failed to copy to clipboard via pbcopy: " .. (stderr or ""))
---     end
---     return ok
--- end
+    -- 旧版是 URI 字符串：用 url.parse（20240127+）解析
+    if type(cwd) == 'string' and wezterm.url and wezterm.url.parse then
+        local ok, url = pcall(wezterm.url.parse, cwd)
+        if ok and url and url.file_path then
+            return url.file_path
+        end
+    end
+
+    -- 最后兜底：手动把 file://... 去掉（可能不处理 %20 之类编码）
+    if type(cwd) == 'string' then
+        return (cwd:gsub('^file://[^/]*', ''))
+    end
+
+    return nil
+end
 
 local temp_file_name = "/tmp/wezterm_temp_file.txt"
 -- Read temp file and push its content to clipboard, then clean up.
@@ -163,52 +166,7 @@ local function trigger_cmd_edit(window, pane)
     local initial_text = ""
     local cursor = original_pane:get_cursor_position()
     local zones = original_pane:get_semantic_zones()
-    -- if zones then
-    --     for index, zone in ipairs(zones) do
-    --         wezterm.log_error("zones.index>>>>>>>>>>>>>>>>>" .. index)
-    --         wezterm.log_error(wezterm.to_string(zone))
-    --         wezterm.log_error(original_pane:get_text_from_semantic_zone(zone))
-    --         -- original_pane:get_text_from_region()
-    --     end
-    -- end
-
-    -- wezterm.log_error("cursor>>")
-    -- log_table_for_debug(cursor)
-    -- wezterm.log_error("zones>>")
-    -- wezterm.log_error(wezterm.to_string(zones))
-
     local found_prompt = false
-    -- if zones then
-    --     -- for i = #zones, 1, -1 do
-    --     -- Find the last prompt that is at or above the cursor
-    --     -- if zones[i].semantic_type == "Prompt" and zones[i].start_y <= cursor.y then
-    --     --     local prompt_end_y = zones[i].end_y
-    --     --     local prompt_end_x = zones[i].end_x
-
-    --     --     -- Safety check: prevent capturing excessive amount of text which might cause crashes
-    --     --     if (cursor.y - prompt_end_y) > 1000 then
-    --     --         wezterm.log_warn("Prompt too far back, limiting capture to last 1000 lines to prevent crash")
-    --     --         prompt_end_y = cursor.y - 1000
-    --     --         prompt_end_x = 0
-    --     --     end
-
-    --     --     -- Capture text from the end of the prompt to a reasonable limit (cursor row + 10)
-    --     --     initial_text = original_pane:get_text_from_region(prompt_end_y, prompt_end_x, cursor.y + 10, 0)
-    --     --     found_prompt = true
-    --     --     break
-    --     -- end
-    --     -- wezterm.log_error("zones:" .. i)
-    --     -- wezterm.log_error(wezterm.to_string(zones[i]))
-    --     -- end
-    -- end
-
-    -- if not found_prompt then
-    --     -- Fallback: Get text of the current line
-    --     initial_text = original_pane:get_lines_as_text(1)
-    --     -- Simple heuristic to strip common prompts if possible, or just take the line
-    --     -- initial_text = initial_text:gsub("^.*[$%%>]%s*", "")
-    -- end
-
     initial_text = get_zone_around_cursor(original_pane)
 
     wezterm.log_error("initial_text>>")
@@ -254,6 +212,18 @@ local function trigger_cmd_edit(window, pane)
     end)
 end
 
+local function open_yazi(window, pane)
+    local cwd = pane_cwd_path(pane)
+    local _, _, new_window = mux.spawn_window({
+        cwd = cwd,
+        args = {'/opt/homebrew/bin/yazi'}
+    })
+    local gui_window = new_window:gui_window()
+    if gui_window then
+        set_window_override(gui_window, "enable_tab_bar", false)
+    end
+end
+
 local M = {}
 
 function M.setup(config)
@@ -272,6 +242,12 @@ function M.setup(config)
         mods = "CMD",
         action = wezterm.action_callback(trigger_cmd_edit)
     })
+    table.insert(config.keys, {
+        key = "O",
+        mods = "CMD|SHIFT",
+        action = wezterm.action_callback(open_yazi)
+    })
+
 end
 
 return M

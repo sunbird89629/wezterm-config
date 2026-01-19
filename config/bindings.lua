@@ -1,33 +1,6 @@
 local wezterm = require("wezterm")
 local M = {}
 
-local function pane_cwd_path(pane)
-    local cwd = pane:get_current_working_dir()
-    if not cwd then
-        return nil
-    end
-
-    -- 新版可能直接是 Url 对象
-    if type(cwd) == 'userdata' or type(cwd) == 'table' then
-        return cwd.file_path
-    end
-
-    -- 旧版是 URI 字符串：用 url.parse（20240127+）解析
-    if type(cwd) == 'string' and wezterm.url and wezterm.url.parse then
-        local ok, url = pcall(wezterm.url.parse, cwd)
-        if ok and url and url.file_path then
-            return url.file_path
-        end
-    end
-
-    -- 最后兜底：手动把 file://... 去掉（可能不处理 %20 之类编码）
-    if type(cwd) == 'string' then
-        return (cwd:gsub('^file://[^/]*', ''))
-    end
-
-    return nil
-end
-
 local function copy_last_command_output(window, pane)
     local zones = pane:get_semantic_zones()
     if not zones then
@@ -56,11 +29,13 @@ local function copy_last_command_output(window, pane)
         if next_zone.semantic_type == 'Output' then
             local line_count = next_zone.end_y - next_zone.start_y
             if line_count > 5000 then
-                 wezterm.log_warn("Output too large ("..line_count.." lines), truncating copy to last 5000 lines to avoid crash.")
-                 local safe_start_y = next_zone.end_y - 5000
-                 text = text .. "\n...[Output truncated]...\n" .. pane:get_text_from_region(safe_start_y, 0, next_zone.end_y, next_zone.end_x)
+                wezterm.log_warn("Output too large (" .. line_count ..
+                                     " lines), truncating copy to last 5000 lines to avoid crash.")
+                local safe_start_y = next_zone.end_y - 5000
+                text = text .. "\n...[Output truncated]...\n" ..
+                           pane:get_text_from_region(safe_start_y, 0, next_zone.end_y, next_zone.end_x)
             else
-                 text = text .. pane:get_text_from_semantic_zone(next_zone)
+                text = text .. pane:get_text_from_semantic_zone(next_zone)
             end
         end
     end
@@ -70,7 +45,11 @@ local function copy_last_command_output(window, pane)
 end
 
 function M.setup(config)
-    config.leader = { key = "l", mods = "CMD", timeout_milliseconds = 1000 }
+    config.leader = {
+        key = "l",
+        mods = "CMD",
+        timeout_milliseconds = 1000
+    }
     local act = wezterm.action
     config.keys = { -- misc / useful
     {
@@ -114,25 +93,34 @@ function M.setup(config)
         mods = "CMD",
         action = act.PaneSelect
     }, {
-        key = "O",
-        mods = "CMD|SHIFT",
-        action = wezterm.action_callback(function(win, pane)
-            local cwd = pane_cwd_path(pane)
-            win:perform_action(act.SpawnCommandInNewWindow({
-                cwd = cwd,
-                args = {'/opt/homebrew/bin/yazi'}
-            }), pane)
-        end)
-    }, {
         key = "L",
         mods = "CMD|SHIFT",
         action = wezterm.action_callback(copy_last_command_output)
-    },
-    -- Send standard navigation keys for Cmd+Arrows
-    { key = "LeftArrow", mods = "CMD", action = act.SendKey({ key = "Home" }) },
-    { key = "RightArrow", mods = "CMD", action = act.SendKey({ key = "End" }) },
-    { key = "UpArrow", mods = "CMD", action = act.SendKey({ key = "PageUp" }) },
-    { key = "DownArrow", mods = "CMD", action = act.SendKey({ key = "PageDown" }) },
-    }
+    }, -- Send standard navigation keys for Cmd+Arrows
+    {
+        key = "LeftArrow",
+        mods = "CMD",
+        action = act.SendKey({
+            key = "Home"
+        })
+    }, {
+        key = "RightArrow",
+        mods = "CMD",
+        action = act.SendKey({
+            key = "End"
+        })
+    }, {
+        key = "UpArrow",
+        mods = "CMD",
+        action = act.SendKey({
+            key = "PageUp"
+        })
+    }, {
+        key = "DownArrow",
+        mods = "CMD",
+        action = act.SendKey({
+            key = "PageDown"
+        })
+    }}
 end
 return M
