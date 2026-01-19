@@ -34,6 +34,12 @@ local function set_interval(interval, callback)
     end
 end
 
+local function set_window_override(window, k, v)
+    local o = window:get_config_overrides() or {}
+    o[k] = v
+    window:set_config_overrides(o)
+end
+
 -- Copy text to clipboard via GUI window if available; fallback to pbcopy.
 -- local function copy_file_to_clipboard(window, text)
 --     local gui_window = nil
@@ -95,10 +101,12 @@ local function trigger_nvim_edit()
         args = {"/bin/zsh", "-lic", "nvim " .. temp_file_name}
     })
 
+    local gui_window = window:gui_window()
+    set_window_override(gui_window, "enable_tab_bar", false)
+
     local pane_id = pane:pane_id()
 
     set_interval(0.2, function()
-        -- wezterm.log_error("pane check running.....")
         local ok, live_pane = pcall(mux.get_pane, pane_id)
         if ok and live_pane then
             return true

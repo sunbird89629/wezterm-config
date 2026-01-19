@@ -26,16 +26,16 @@ local function apply_focus_style(window, focused)
     local overrides = window:get_config_overrides() or {}
     local effective = window:effective_config()
     local frame = effective.window_frame or {}
-    local target_opacity = focused and FOCUSED_OPACITY or UNFOCUSED_OPACITY
+    -- local target_opacity = focused and FOCUSED_OPACITY or UNFOCUSED_OPACITY
     local target_color = focused and FOCUSED_BORDER or UNFOCUSED_BORDER
     local target_frame = build_window_frame(frame, target_color)
 
     local current_frame = overrides.window_frame or {}
-    local needs_update = overrides.window_background_opacity ~= target_opacity
-        or current_frame.border_left_color ~= target_frame.border_left_color
-        or current_frame.border_right_color ~= target_frame.border_right_color
-        or current_frame.border_top_color ~= target_frame.border_top_color
-        or current_frame.border_bottom_color ~= target_frame.border_bottom_color
+    local needs_update = overrides.window_background_opacity ~= target_opacity or current_frame.border_left_color ~=
+                             target_frame.border_left_color or current_frame.border_right_color ~=
+                             target_frame.border_right_color or current_frame.border_top_color ~=
+                             target_frame.border_top_color or current_frame.border_bottom_color ~=
+                             target_frame.border_bottom_color
 
     if not needs_update then
         return
