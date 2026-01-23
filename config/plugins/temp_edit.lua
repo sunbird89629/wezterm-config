@@ -97,16 +97,14 @@ local function log_table_for_debug(target)
 
 end
 
-
 local function get_activate_screen()
-    local screens=wezterm.gui.screens()
+    local screens = wezterm.gui.screens()
     return screens.active or screens.main
 end
 
-
 local function set_as_dialog_window(gui_window)
     set_window_override(gui_window, "enable_tab_bar", false)
-    set_window_override(gui_window, "window_background_opacity", 0.9)
+    -- set_window_override(gui_window, "window_background_opacity", 0.9)
 
     local screen = get_activate_screen()
 
@@ -118,7 +116,6 @@ local function set_as_dialog_window(gui_window)
     end
 end
 
-
 local function trigger_nvim_edit()
     lib.file_io.write_file(temp_file_name, "")
     local _, pane, window = mux.spawn_window({
@@ -126,7 +123,7 @@ local function trigger_nvim_edit()
     })
 
     local gui_window = window:gui_window()
-    
+
     set_as_dialog_window(gui_window)
 
     local pane_id = pane:pane_id()

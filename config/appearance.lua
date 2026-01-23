@@ -3,12 +3,21 @@ local M = {}
 
 function M.setup(config)
     -- =========== 基础外观 ===========
-    config.window_background_opacity = 0.2
+    -- config.window_background_opacity = 0.4
+    -- config.macos_window_background_blur = 80
     config.window_close_confirmation = "NeverPrompt"
-    config.macos_window_background_blur = 60
+
     config.default_cursor_style = "BlinkingBar"
     config.font_size = 24
-    config.color_scheme = "Glacier"
+    -- config.color_scheme = "Marrakesh (light) (terminal.sexy)"
+    -- config.color_scheme = 'Monokai Pro Ristretto (Gogh)'
+    -- config.color_scheme = 'Material'
+    -- config.color_scheme = 'MaterialDesignColors'
+    -- config.color_scheme = 'nord-light'
+    -- config.color_scheme = 'Medallion'
+    -- config.color_scheme = 'Mocha (dark) (terminal.sexy)'
+    -- config.color_scheme = 'Sat (Gogh)'
+    config.color_scheme = 'Seafoam Pastel'
 
     config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
 
