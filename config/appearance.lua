@@ -3,29 +3,37 @@ local M = {}
 
 function M.setup(config)
     -- =========== 基础外观 ===========
-    config.window_background_opacity = 0.9
+    config.window_background_opacity = 0.2
     config.window_close_confirmation = "NeverPrompt"
-    config.macos_window_background_blur = 40
+    config.macos_window_background_blur = 60
     config.default_cursor_style = "BlinkingBar"
     config.font_size = 24
     config.color_scheme = "Glacier"
 
     config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
 
-    --  config.window_padding = { left = 4, right = 4, top = 4, bottom = 4 }
-    local border_width = "2px";
-    local border_color = "#C06DD8";
-    config.window_frame = {
-        border_left_width = border_width,
-        border_right_width = border_width,
-        border_top_height = border_width,
-        border_bottom_height = border_width,
-        border_left_color = border_color,
-        border_right_color = border_color,
-        border_top_color = border_color,
-        border_bottom_color = border_color
+    --     config.window_frame = {
+    --         border_left_width = '0.5cell',
+    --         border_right_width = '0.5cell',
+    --         border_bottom_height = '0.25cell',
+    --         border_top_height = '0.25cell',
+    --         border_left_color = 'purple',
+    --         border_right_color = 'purple',
+    --         border_bottom_color = 'purple',
+    --         border_top_color = 'purple',    
+    --    }
+    config.window_padding = {
+        left = 30,
+        right = 30,
+        top = 30,
+        bottom = 30
     }
-
+    -- local border_width = "2px";
+    -- local border_color = "#C06DD8";
+    -- config.window_frame = {
+    --     border_left_width = 10,
+    --     border_right_width = 10
+    -- }
     -- =========== Command Palette 外观 ===========
     config.command_palette_font = wezterm.font("JetBrains Mono")
     config.command_palette_font_size = 28.0
