@@ -122,5 +122,9 @@ function M.setup(config)
             key = "PageDown"
         })
     }}
+
+    -- Load the custom demo palette plugin
+    local demo_palette = require('config.plugins.demo_palette')
+    demo_palette.setup(config)
 end
 return M

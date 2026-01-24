@@ -24,6 +24,7 @@ require("config.plugins.replay").setup(config)
 require("config.plugins.toggle_terminal").setup(config)
 require("config.plugins.quick_domains").setup(config)
 require("config.plugins.ai_helper").setup(config)
+require("config.plugins.temp_demo_menu").setup(config)
 require("config.plugins.temp_edit").setup(config)
 -- require("config.plugins.modal").setup(config)
 
