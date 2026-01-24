@@ -45,7 +45,7 @@ function M.setup(config)
     -- }
     -- =========== Command Palette 外观 ===========
     config.command_palette_font = wezterm.font("JetBrains Mono")
-    config.command_palette_font_size = 28.0
+    config.command_palette_font_size = 16.0
 
     config_tab_bar_colors(config)
 end
@@ -54,6 +54,18 @@ function config_tab_bar_colors(config)
     -- config.use_fancy_tab_bar = false
     config.underline_thickness = "2px"
     config.colors = {
+        -- Overrides for the Command Palette / Input Selector
+        -- Making it visually distinct with a dark modal feel even if theme is light
+        quick_select_label_bg = { Color = "#fab387" },
+        quick_select_label_fg = { Color = "#1e1e2e" },
+        
+        -- Since WezTerm doesn't have a simple "command_palette_bg" key in the colors table 
+        -- (it uses the color scheme's background), we can't easily force it dark 
+        -- without changing the whole scheme or using complex overrides.
+        -- But we can ensure the selection highlights are nice.
+        selection_bg = "#585b70",
+        selection_fg = "#cdd6f4",
+
         split = "#5d7cff",
         tab_bar = {
             background = "#0c0f1a", -- bar background
