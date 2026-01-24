@@ -95,7 +95,6 @@ local function config_tab_bar_style(config)
 end
 
 local function config_cammand_palette_style(config)
-    -- =========== Command Palette 外观 ===========
     config.command_palette_font = wezterm.font("JetBrains Mono")
     config.command_palette_font_size = 24
     config.command_palette_rows = 28
