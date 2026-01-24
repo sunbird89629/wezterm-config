@@ -8,3 +8,4 @@
 .crush/
 firebase-debug.log
 tmp/
+secrets.lua
