@@ -139,6 +139,10 @@ local function trigger_nvim_edit()
     end)
 end
 
+local function trigger_nvim_edit_gemini()
+    -- 这里实现对 gemini 配置文件的修改
+end
+
 -- Helper to write content to a file
 local function write_file(path, content)
     local f = io.open(path, "w")
@@ -502,12 +506,63 @@ function M.activate(window, pane)
     }, pane)
 end
 
+-- local key_binding = {
+--     key = 'e',
+--     mods = 'CMD|SHIFT',
+--     action = wezterm.action_callback(function(window, pane)
+--         M.activate(window, pane)
+--     end)
+-- }
+
+-- local items={
+--     {
+--             label = "Edit With Neovim",
+--             id = 'edit_with_neovim'
+--     }
+-- }
+
 local key_binding = {
     key = 'e',
     mods = 'CMD',
-    action = wezterm.action_callback(function(window, pane)
-        M.activate(window, pane)
-    end)
+    action = act.InputSelector {
+        action = wezterm.action_callback(function(window, pane, id, label)
+            if id == 'edit_current_cammand' then
+                trigger_cmd_edit(window, pane)
+            elseif id == 'edit_with_neovim' then
+                trigger_nvim_edit()
+            elseif id == 'edit_temini_config' then
+                trigger_nvim_edit_gemini()
+            else
+                window:toast_notification("selected nothing......")
+            end
+            -- if not id and not label then
+            --     wezterm.log_info 'cancelled'
+            -- -- else if id == 'edit_with_neovim' then
+            -- --    wezterm.log_info('you selected ', id, label) 
+            -- else
+            --     wezterm.log_info('you selected ', id, label)
+            --     pane:send_text(id)
+            -- end
+        end),
+        title = 'Quick Edit',
+        choices = {{
+            label = "Current Cammand Edit With Neovim",
+            -- This is the text that we'll send to the terminal when
+            -- this entry is selected
+            id = 'edit_current_cammand'
+        }, {
+            label = "Edit With Neovim",
+            -- This is the text that we'll send to the terminal when
+            -- this entry is selected
+            id = 'edit_with_neovim'
+        }, {
+            label = 'Edit Gemini Config',
+            id = 'edit_gemini_config'
+        }, {
+            label = 'Test Item this is test item with long desc',
+            id = 'edit_temini_config'
+        }}
+    }
 }
 
 function M.setup(config)
@@ -523,12 +578,12 @@ function M.setup(config)
         -- action = wezterm.action_callback(trigger_edit)
         action = wezterm.action_callback(trigger_nvim_edit)
     })
-    table.insert(config.keys, {
-        key = "e",
-        mods = "CMD",
-        action = wezterm.action_callback(trigger_cmd_edit)
-    })
-    -- table.insert(config.keys, key_binding)
+    -- table.insert(config.keys, {
+    --     key = "e",
+    --     mods = "CMD",
+    --     action = wezterm.action_callback(trigger_cmd_edit)
+    -- })
+    table.insert(config.keys, key_binding)
     table.insert(config.keys, {
         key = "O",
         mods = "CMD|SHIFT",
