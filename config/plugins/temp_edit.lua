@@ -139,8 +139,9 @@ local function trigger_nvim_edit()
     end)
 end
 
-local function trigger_nvim_edit_gemini()
+local function trigger_nvim_edit_gemini(window, pane, id, label)
     -- 这里实现对 gemini 配置文件的修改
+    wezterm.run_child_process({"/usr/local/bin/code", "/Users/hao/.gemini"})
 end
 
 -- Helper to write content to a file
@@ -530,8 +531,8 @@ local key_binding = {
                 trigger_cmd_edit(window, pane)
             elseif id == 'edit_with_neovim' then
                 trigger_nvim_edit()
-            elseif id == 'edit_temini_config' then
-                trigger_nvim_edit_gemini()
+            elseif id == 'edit_gemini_config' then
+                trigger_nvim_edit_gemini(window, pane, id, label)
             else
                 window:toast_notification("selected nothing......")
             end
