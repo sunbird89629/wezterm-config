@@ -2,6 +2,10 @@ local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
 config.automatically_reload_config = true
+config.scrollback_lines = 20000
+config.exit_behavior = 'CloseOnCleanExit'
+config.audible_bell = 'Disabled'
+config.status_update_interval = 1000
 config.debug_key_events = false
 config.initial_rows = 40
 config.initial_cols = 120
@@ -21,6 +25,8 @@ require("events.input-method").setup()
 require("config.bindings").setup(config)
 -- SSH domains
 require("config.domains").setup(config)
+-- Hyperlink rules
+require("config.hyperlinks").setup(config)
 -- Plugins
 -- require("config.plugins.bar").setup(config)
 require("config.plugins.tabline").setup(config)
