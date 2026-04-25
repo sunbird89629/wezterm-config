@@ -38,7 +38,7 @@ require("config.plugins.quick_domains").setup(config)
 -- require("config.plugins.quota_limit").setup(config)
 -- require("config.plugins.ai_helper").setup(config)
 -- require("config.plugins.temp_demo_menu").setup(config)
--- require("config.plugins.temp_edit").setup(config)
+require("config.plugins.temp_edit").setup(config)
 -- require("config.plugins.modal").setup(config)
 
 -- 继承官方默认 key_tables（关键：否则你自己写 copy_mode 会覆盖默认）
