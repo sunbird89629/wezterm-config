@@ -1,8 +1,3 @@
--- 该方法实现如下功能：
--- 1.创建一个临时文件
--- 2.打开一个新的 wezterm 窗口
--- 3.在新窗口中通过 vim 打开第一步创建的临时文件
--- 4.在 vim 中编辑完成，通过 :wq 退出 vim 的时候，把这个临时文件中的内容 copy 到系统剪切板
 local wezterm = require("wezterm")
 local lib = wezterm.plugin.require("https://github.com/chrisgve/lib.wezterm")
 local time = wezterm.time
@@ -10,6 +5,12 @@ local act = wezterm.action
 local mux = wezterm.mux
 local io = require("io")
 local os = require("os")
+
+local M = {}
+
+--------------------------------------------------------------------------------
+-- Utility Functions
+--------------------------------------------------------------------------------
 
 --- Execute a callback periodically.
 --- @param interval number Seconds between calls
@@ -40,18 +41,18 @@ local function set_window_override(window, k, v)
     window:set_config_overrides(o)
 end
 
-local function pane_cwd_path(pane)
+local function get_pane_cwd(pane)
     local cwd = pane:get_current_working_dir()
     if not cwd then
         return nil
     end
 
-    -- 新版可能直接是 Url 对象
+    -- New version might be a Url object
     if type(cwd) == 'userdata' or type(cwd) == 'table' then
         return cwd.file_path
     end
 
-    -- 旧版是 URI 字符串：用 url.parse（20240127+）解析
+    -- Old version is URI string
     if type(cwd) == 'string' and wezterm.url and wezterm.url.parse then
         local ok, url = pcall(wezterm.url.parse, cwd)
         if ok and url and url.file_path then
@@ -59,7 +60,7 @@ local function pane_cwd_path(pane)
         end
     end
 
-    -- 最后兜底：手动把 file://... 去掉（可能不处理 %20 之类编码）
+    -- Fallback: strip file:// prefix
     if type(cwd) == 'string' then
         return (cwd:gsub('^file://[^/]*', ''))
     end
@@ -67,84 +68,23 @@ local function pane_cwd_path(pane)
     return nil
 end
 
-local temp_file_name = "/tmp/wezterm_temp_file.txt"
--- Read temp file and push its content to clipboard, then clean up.
-local function on_pane_exit(window, pane)
-    local ok, _, stderr = wezterm.run_child_process({"/bin/sh", "-c", "/usr/bin/pbcopy < " .. temp_file_name})
-    if window and pane then
-        pcall(function()
-            window:perform_action(act.CloseCurrentTab({
-                confirm = false
-            }), pane)
-        end)
-    end
-end
-
--- Debugging: Print keys in lib to see what is available
-local function log_table_for_debug(target)
-    if target then
-        for k, v in pairs(target) do
-            wezterm.log_error("lib key: " .. k .. " -> " .. tostring(v))
-            if type(v) == "table" then
-                for k2, v2 in pairs(v) do
-                    wezterm.log_error("  " .. k .. "." .. k2 .. " -> " .. tostring(v2))
-                end
-            end
-        end
-    else
-        wezterm.log_error("target is nil")
-    end
-
-end
-
-local function get_activate_screen()
+local function get_active_screen()
     local screens = wezterm.gui.screens()
     return screens.active or screens.main
 end
 
-local function set_as_dialog_window(gui_window)
+local function apply_dialog_styling(gui_window)
+    if not gui_window then
+        return
+    end
     set_window_override(gui_window, "enable_tab_bar", false)
-    -- set_window_override(gui_window, "window_background_opacity", 0.9)
 
-    local screen = get_activate_screen()
-
+    local screen = get_active_screen()
     local target_w = math.floor(screen.width * 0.86)
     local target_h = math.floor(screen.height * 0.86)
-
-    if gui_window then
-        gui_window:set_inner_size(target_w, target_h)
-    end
+    gui_window:set_inner_size(target_w, target_h)
 end
 
-local function trigger_nvim_edit()
-    lib.file_io.write_file(temp_file_name, "")
-    local _, pane, window = mux.spawn_window({
-        args = {"/bin/zsh", "-lic", "nvim " .. temp_file_name}
-    })
-
-    local gui_window = window:gui_window()
-
-    set_as_dialog_window(gui_window)
-
-    local pane_id = pane:pane_id()
-
-    set_interval(0.2, function()
-        local ok, live_pane = pcall(mux.get_pane, pane_id)
-        if ok and live_pane then
-            return true
-        else
-            on_pane_exit(window, pane)
-            return false
-        end
-    end)
-end
-
-local function trigger_nvim_edit_gemini(window, pane, id, label)
-    -- 这里实现对 gemini 配置文件的修改
-    wezterm.run_child_process({"/usr/local/bin/code", "/Users/hao/.gemini"})
-end
-
--- Helper to write content to a file
 local function write_file(path, content)
     local f = io.open(path, "w")
     if f then
@@ -155,7 +95,6 @@ local function write_file(path, content)
     end
 end
 
--- Helper to read content from a file
 local function read_file(path)
     local f = io.open(path, "r")
     if f then
@@ -166,9 +105,7 @@ local function read_file(path)
     return nil
 end
 
--- If you have shell integration configured, returns the zone around
--- the current cursor position
-local function get_zone_around_cursor(pane)
+local function get_text_around_cursor(pane)
     local cursor = pane:get_cursor_position()
     -- using x-1 here because the cursor may be one cell outside the zone
     local zone = pane:get_semantic_zone_at(cursor.x - 1, cursor.y)
@@ -178,79 +115,93 @@ local function get_zone_around_cursor(pane)
     return nil
 end
 
+--------------------------------------------------------------------------------
+-- Action Handlers
+--------------------------------------------------------------------------------
+
+local TEMP_NVIM_FILE = "/tmp/wezterm_temp_file.txt"
+
+-- Read temp file and push its content to clipboard, then clean up.
+local function handle_pane_exit(window, pane)
+    wezterm.run_child_process({"/bin/sh", "-c", "/usr/bin/pbcopy < " .. TEMP_NVIM_FILE})
+    if window and pane then
+        pcall(function()
+            window:perform_action(act.CloseCurrentTab({
+                confirm = false
+            }), pane)
+        end)
+    end
+end
+
+local function trigger_nvim_edit()
+    lib.file_io.write_file(TEMP_NVIM_FILE, "")
+    local _, pane, window = mux.spawn_window({
+        args = {"/bin/zsh", "-lic", "nvim " .. TEMP_NVIM_FILE}
+    })
+
+    local gui_window = window:gui_window()
+    apply_dialog_styling(gui_window)
+
+    local pane_id = pane:pane_id()
+    set_interval(0.2, function()
+        local ok, live_pane = pcall(mux.get_pane, pane_id)
+        if ok and live_pane then
+            return true
+        else
+            handle_pane_exit(window, pane)
+            return false
+        end
+    end)
+end
+
+local function trigger_gemini_edit()
+    wezterm.run_child_process({"/usr/local/bin/code", "/Users/hao/.gemini"})
+end
+
 local function trigger_cmd_edit(window, pane)
-    local original_pane = pane
-    local original_pane_id = original_pane:pane_id()
+    local original_pane_id = pane:pane_id()
+    local temp_path = "/tmp/wezterm_edit_" .. tostring(original_pane_id) .. "_" .. os.time() .. ".txt"
 
-    -- Generate a unique temp file path
-    local temp_file_path = "/tmp/wezterm_edit_" .. tostring(original_pane_id) .. "_" .. os.time() .. ".txt"
+    local initial_text = get_text_around_cursor(pane) or ""
+    write_file(temp_path, initial_text)
 
-    -- 1. Grab text
-    local initial_text = ""
-    local cursor = original_pane:get_cursor_position()
-    local zones = original_pane:get_semantic_zones()
-    local found_prompt = false
-    initial_text = get_zone_around_cursor(original_pane)
-
-    wezterm.log_error("initial_text>>")
-    wezterm.log_error(initial_text)
-
-    -- Write initial text to temp file
-    write_file(temp_file_path, initial_text)
-
-    -- 2. Spawn a new window running neovim
-    -- Use zsh -lic to ensure user config/path is loaded for nvim
-    local _, new_pane, _ = mux.spawn_window({
-        args = {"/bin/zsh", "-lic", "nvim " .. temp_file_path}
+    local _, new_pane = mux.spawn_window({
+        args = {"/bin/zsh", "-lic", "nvim " .. temp_path}
     })
     local new_pane_id = new_pane:pane_id()
 
-    -- 3. Poll for the editor pane to close
     set_interval(0.5, function()
-        local ok, _ = pcall(mux.get_pane, new_pane_id)
+        local ok = pcall(mux.get_pane, new_pane_id)
         if not ok then
-            -- The new pane is dead (editor exited)
-            local content = read_file(temp_file_path)
+            local content = read_file(temp_path)
             if content then
-                -- Trim the trailing newline that editors typically add
                 content = content:gsub("[\n\r]+$", "")
-
-                -- Send the edited text back to the original pane
                 local p_ok, live_orig = pcall(mux.get_pane, original_pane_id)
                 if p_ok and live_orig then
-                    -- Clear the current line and paste the new content
-                    -- \x01 (Ctrl-A) moves to start of line
-                    -- \x15 (Ctrl-U) clears to start of line (bash/zsh)
-                    -- \x0b (Ctrl-K) clears to end of line
-                    -- sending Ctrl-U and Ctrl-K is safer to clear the whole line
                     live_orig:send_text("\x15\x0b" .. content)
                 end
             end
-
-            -- Cleanup
-            os.remove(temp_file_path)
-            return false -- Stop polling
+            os.remove(temp_path)
+            return false
         end
-        return true -- Continue polling
+        return true
     end)
 end
 
 local function open_yazi(window, pane)
-    local cwd = pane_cwd_path(pane)
+    local cwd = get_pane_cwd(pane)
     local _, _, new_window = mux.spawn_window({
         cwd = cwd,
         args = {'/opt/homebrew/bin/yazi'}
     })
-    local gui_window = new_window:gui_window()
-    if gui_window then
-        set_window_override(gui_window, "enable_tab_bar", false)
-    end
+    apply_dialog_styling(new_window:gui_window())
 end
 
-local M = {}
+--------------------------------------------------------------------------------
+-- UI Builders
+--------------------------------------------------------------------------------
 
--- 定义一组演示命令
-local commands = {{
+local PALETTE_COMMANDS = {{
     id = 'reload',
     category = 'System',
     icon = '',
@@ -332,162 +283,63 @@ local commands = {{
     key = 'None'
 }}
 
--- 辅助函数：构建显示的 Label
--- width: 允许的最大字符宽度
-local function build_label(cmd, width, scheme_is_dark)
-    -- 简单判断颜色可见性（如果需要更复杂逻辑可以扩展）
-    -- 这里我们使用 AnsiColor 或者具体的 hex，尽量保持通用
+local function build_palette_label(cmd, width)
+    local fixed_len = 4 + #cmd.label + 2 + #cmd.desc + 2 + #cmd.key
+    local padding = math.max(0, width - fixed_len)
 
-    local label_width = #cmd.label
-    local desc_width = #cmd.desc
-    local key_width = #cmd.key
-
-    -- 基础布局计算
-    -- Icon(4) + Label + Padding + Desc + Padding + Key
-    local icon_len = 4
-    local min_padding = 2
-
-    -- 动态计算中间的 padding
-    -- 我们希望 Key 靠右对齐
-    -- 剩余空间 = 总宽度 - Icon - Label - Desc - Key - MinPadding
-    local fixed_content_len = icon_len + label_width + min_padding + desc_width + min_padding + key_width
-    local dynamic_padding = width - fixed_content_len
-
-    if dynamic_padding < 0 then
-        dynamic_padding = 0
-    end
-
-    -- 构建文本元素
-    local elements = {}
-
-    -- 1. Icon (带颜色)
-    table.insert(elements, {
+    return wezterm.format({{
         Foreground = {
             AnsiColor = cmd.color
         }
-    })
-    table.insert(elements, {
+    }, {
         Text = cmd.icon .. '   '
-    })
-
-    -- 2. Label (使用默认前景色，自动适配明/暗主题)
-    table.insert(elements, 'ResetAttributes') -- Reset color and attributes
-    table.insert(elements, {
+    }, 'ResetAttributes', {
         Attribute = {
             Intensity = 'Bold'
         }
-    })
-    table.insert(elements, {
+    }, {
         Text = cmd.label
-    })
-    table.insert(elements, {
+    }, {
         Attribute = {
             Intensity = 'Normal'
         }
-    })
-
-    -- 3. Description (灰色/变淡)
-    -- 使用固定的间距分开 Label 和 Description
-    table.insert(elements, {
+    }, {
         Text = '  '
-    })
-
-    -- 描述文字颜色：在 Light 模式下要是深灰，Dark 模式下要是浅灰
-    -- 我们可以使用 AnsiColor Grey 或者根据主题判断，这里简单使用 'Grey' (通常对应 bright black)
-    table.insert(elements, {
+    }, {
         Foreground = {
             AnsiColor = 'Grey'
         }
-    })
-    table.insert(elements, {
+    }, {
         Attribute = {
             Intensity = 'Half'
         }
-    }) -- Faint
-    table.insert(elements, {
+    }, {
         Text = cmd.desc
-    })
-    table.insert(elements, {
+    }, {
         Attribute = {
             Intensity = 'Normal'
         }
-    })
-
-    -- 4. Right Align Padding + Shortcut
-    if cmd.key ~= 'None' then
-        table.insert(elements, {
-            Text = string.rep(' ', dynamic_padding)
-        })
-        table.insert(elements, {
-            Foreground = {
-                AnsiColor = 'Yellow'
-            }
-        })
-        table.insert(elements, {
-            Text = cmd.key
-        })
-    end
-
-    return wezterm.format(elements)
+    }, {
+        Text = string.rep(' ', padding)
+    }, {
+        Foreground = {
+            AnsiColor = 'Yellow'
+        }
+    }, {
+        Text = cmd.key ~= 'None' and cmd.key or ''
+    }})
 end
 
-function M.activate(window, pane)
-    -- 获取当前窗口尺寸以计算对齐
-    local dims = window:get_dimensions()
-    -- 假设 Command Palette 占据屏幕宽度的 40-50% 左右（WezTerm 默认行为），或者我们以 cell 为单位估算
-    -- InputSelector 默认是居中，宽度约为 60-80 chars，但也取决于内容。
-    -- 我们这里设定一个期望的宽度用于对齐。
-    local width = 80
-
-    -- 检测当前主题是亮色还是暗色（用于微调颜色，如果需要）
-    -- 暂时假设默认
-
+function M.activate_palette(window, pane)
     local choices = {}
-    for _, cmd in ipairs(commands) do
+    for _, cmd in ipairs(PALETTE_COMMANDS) do
         table.insert(choices, {
             id = cmd.id,
-            label = build_label(cmd, width, true)
+            label = build_palette_label(cmd, 80)
         })
     end
 
     window:perform_action(act.InputSelector {
-        action = wezterm.action_callback(function(window, pane, id, label)
-            if not id then
-                return
-            end
-
-            if id == 'reload' then
-                window:perform_action(act.ReloadConfiguration, pane)
-            elseif id == 'debug' then
-                window:perform_action(act.ShowDebugOverlay, pane)
-            elseif id == 'split_h' then
-                window:perform_action(act.SplitHorizontal {
-                    domain = 'CurrentPaneDomain'
-                }, pane)
-            elseif id == 'split_v' then
-                window:perform_action(act.SplitVertical {
-                    domain = 'CurrentPaneDomain'
-                }, pane)
-            elseif id == 'zoom' then
-                window:perform_action(act.TogglePaneZoomState, pane)
-            elseif id == 'theme' then
-                window:perform_action(act.InputSelector {
-                    action = wezterm.action_callback(function(window, pane, id, label)
-                        if id then
-                            window:set_config_overrides({
-                                color_scheme = id
-                            })
-                        end
-                    end),
-                    choices = wezterm.get_builtin_color_schemes(),
-                    fuzzy = true,
-                    title = 'Select Theme'
-                }, pane)
-            else
-                window:toast_notification('Demo', 'Selected: ' .. label, nil, 2000)
-            end
-        end),
-
         title = wezterm.format({{
             Attribute = {
                 Intensity = 'Bold'
@@ -501,96 +353,94 @@ function M.activate(window, pane)
         }}),
         choices = choices,
         fuzzy = false,
-        fuzzy_description = 'Search: '
-        -- 增加一些样式配置 (WezTerm Nightly 支持)
-        -- alphabetical = false,
+        action = wezterm.action_callback(function(win, p, id, label)
+            if not id then
+                return
+            end
+            if id == 'reload' then
+                win:perform_action(act.ReloadConfiguration, p)
+            elseif id == 'debug' then
+                win:perform_action(act.ShowDebugOverlay, p)
+            elseif id == 'split_h' then
+                win:perform_action(act.SplitHorizontal {
+                    domain = 'CurrentPaneDomain'
+                }, p)
+            elseif id == 'split_v' then
+                win:perform_action(act.SplitVertical {
+                    domain = 'CurrentPaneDomain'
+                }, p)
+            elseif id == 'zoom' then
+                win:perform_action(act.TogglePaneZoomState, p)
+            elseif id == 'theme' then
+                win:perform_action(act.InputSelector {
+                    title = 'Select Theme',
+                    choices = wezterm.get_builtin_color_schemes(),
+                    fuzzy = true,
+                    action = wezterm.action_callback(function(w, _, theme_id)
+                        if theme_id then
+                            w:set_config_overrides({
+                                color_scheme = theme_id
+                            })
+                        end
+                    end)
+                }, p)
+            else
+                win:toast_notification('Demo', 'Selected: ' .. label, nil, 2000)
+            end
+        end)
     }, pane)
 end
 
--- local key_binding = {
---     key = 'e',
---     mods = 'CMD|SHIFT',
---     action = wezterm.action_callback(function(window, pane)
---         M.activate(window, pane)
---     end)
--- }
-
--- local items={
---     {
---             label = "Edit With Neovim",
---             id = 'edit_with_neovim'
---     }
--- }
-
-local key_binding = {
+local QUICK_EDIT_BINDING = {
     key = 'e',
     mods = 'CMD',
     action = act.InputSelector {
-        action = wezterm.action_callback(function(window, pane, id, label)
-            if id == 'edit_current_cammand' then
-                trigger_cmd_edit(window, pane)
-            elseif id == 'edit_with_neovim' then
-                trigger_nvim_edit()
-            elseif id == 'edit_gemini_config' then
-                trigger_nvim_edit_gemini(window, pane, id, label)
-            else
-                window:toast_notification("selected nothing......")
-            end
-            -- if not id and not label then
-            --     wezterm.log_info 'cancelled'
-            -- -- else if id == 'edit_with_neovim' then
-            -- --    wezterm.log_info('you selected ', id, label) 
-            -- else
-            --     wezterm.log_info('you selected ', id, label)
-            --     pane:send_text(id)
-            -- end
-        end),
         title = 'Quick Edit',
         choices = {{
-            label = "Current Cammand Edit With Neovim",
-            -- This is the text that we'll send to the terminal when
-            -- this entry is selected
-            id = 'edit_current_cammand'
+            label = "Current Command Edit With Neovim",
+            id = 'edit_current_command'
         }, {
             label = "Edit With Neovim",
-            -- This is the text that we'll send to the terminal when
-            -- this entry is selected
             id = 'edit_with_neovim'
         }, {
             label = 'Edit Gemini Config',
             id = 'edit_gemini_config'
-        }, {
-            label = 'Test Item this is test item with long desc',
-            id = 'edit_temini_config'
-        }}
+        }},
+        action = wezterm.action_callback(function(window, pane, id)
+            if id == 'edit_current_command' then
+                trigger_cmd_edit(window, pane)
+            elseif id == 'edit_with_neovim' then
+                trigger_nvim_edit()
+            elseif id == 'edit_gemini_config' then
+                trigger_gemini_edit()
+            end
+        end)
     }
 }
 
+--------------------------------------------------------------------------------
+-- Public API
+--------------------------------------------------------------------------------
+
 function M.setup(config)
-    wezterm.log_error("temp_edit plugin setup")
-    -- 确保 config.keys 表存在
     config.keys = config.keys or {}
 
-    -- 注意：这里我们需要把 key binding 改为调用 action_callback 以便动态执行 M.activate
-
+    -- Command+Shift+N: Trigger simple nvim edit
     table.insert(config.keys, {
         key = "N",
         mods = "CMD|SHIFT",
-        -- action = wezterm.action_callback(trigger_edit)
         action = wezterm.action_callback(trigger_nvim_edit)
     })
-    -- table.insert(config.keys, {
-    --     key = "e",
-    --     mods = "CMD",
-    --     action = wezterm.action_callback(trigger_cmd_edit)
-    -- })
-    table.insert(config.keys, key_binding)
+
+    -- Command+E: Quick Edit Selector
+    table.insert(config.keys, QUICK_EDIT_BINDING)
+
+    -- Command+Shift+O: Open Yazi
     table.insert(config.keys, {
         key = "O",
         mods = "CMD|SHIFT",
         action = wezterm.action_callback(open_yazi)
     })
-
 end
 
 return M
