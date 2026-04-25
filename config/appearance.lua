@@ -30,9 +30,9 @@ local function config_tab_bar_style(config)
         Color = "#11111b"
     }
 
-    -- Selection colors (Affects both terminal selection and command palette highlighted item)
-    config.colors.selection_bg = "#58a6ff" -- 明亮的蓝色
-    config.colors.selection_fg = "#0d1117" -- 深色文字以保持对比度
+    -- Selection colors
+    config.colors.selection_bg = "#89b4fa"
+    config.colors.selection_fg = "#11111b"
 
     -- Split color
     config.colors.split = "#5d7cff"

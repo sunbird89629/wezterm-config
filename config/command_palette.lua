@@ -2,11 +2,19 @@ local wezterm = require("wezterm")
 local M = {}
 
 function M.setup(config)
-    -- 1. 基础尺寸与布局
-    config.command_palette_rows = 24 -- 减少行数让布局更紧凑
-    config.command_palette_font_size = 24 -- 稍微加大字号提高可读性
-    config.command_palette_bg_color = '#1e1e2e'
-    --  config.command_palette_font='#1e1e2e'
+    -- 1. 核心配置 (严格按照用户要求的 24/24 比例)
+    config.command_palette_rows = 24
+    config.command_palette_font_size = 24.0
+
+    -- 2. 颜色配置 (顶层字段)
+    config.command_palette_bg_color = '#11111b'
+    config.command_palette_fg_color = '#ffffff'
+
+    -- 3. 字体回退
+    config.command_palette_font = wezterm.font_with_fallback({{
+        family = 'Material Design Icons',
+        weight = 'Bold'
+    }})
 end
 
 return M
