@@ -1,11 +1,12 @@
 local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
-config.automatically_reload_config = false
+config.automatically_reload_config = true
 config.debug_key_events = false
 config.initial_rows = 40
 config.initial_cols = 120
 config.check_for_updates = false
+config.selection_word_boundary = " \t\n{}[]()\"'`"
 config.check_for_updates_interval_seconds = 86400
 
 -- 基础样式配置
@@ -24,7 +25,8 @@ require("config.plugins.tabline").setup(config)
 require("config.plugins.replay").setup(config)
 require("config.plugins.toggle_terminal").setup(config)
 require("config.plugins.quick_domains").setup(config)
-require("config.plugins.ai_helper").setup(config)
+-- require("config.plugins.quota_limit").setup(config)
+-- require("config.plugins.ai_helper").setup(config)
 -- require("config.plugins.temp_demo_menu").setup(config)
 require("config.plugins.temp_edit").setup(config)
 -- require("config.plugins.modal").setup(config)

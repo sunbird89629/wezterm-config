@@ -7,7 +7,7 @@ local function config_base_style(config)
     -- config.macos_window_background_blur = 80
     config.window_close_confirmation = "NeverPrompt"
     config.default_cursor_style = "BlinkingBar"
-    config.font_size = 24
+    config.font_size = 22
     -- config.color_scheme = "Marrakesh (light) (terminal.sexy)"
     -- config.color_scheme = 'Monokai Pro Ristretto (Gogh)'
     -- config.color_scheme = 'Material'
@@ -16,7 +16,9 @@ local function config_base_style(config)
     -- config.color_scheme = 'Medallion'
     -- config.color_scheme = 'Mocha (dark) (terminal.sexy)'
     -- config.color_scheme = 'Sat (Gogh)'
-    config.color_scheme = 'Seafoam Pastel'
+    -- config.color_scheme = 'Seafoam Pastel'
+    config.color_scheme = 'Abernathy'
+    -- config.color_scheme = 'Atelier Lakeside Light (base16)'
 
     config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
 
@@ -95,9 +97,10 @@ local function config_tab_bar_style(config)
 end
 
 local function config_cammand_palette_style(config)
-    config.command_palette_font = wezterm.font("JetBrains Mono")
-    config.command_palette_font_size = 24
+    -- config.command_palette_font = wezterm.font("JetBrains Mono")
+    config.command_palette_font_size = 22
     config.command_palette_rows = 28
+    config.command_palette_bg_color = "#231c27"
 end
 
 function M.setup(config)

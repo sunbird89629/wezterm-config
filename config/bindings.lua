@@ -53,6 +53,14 @@ function M.setup(config)
     local act = wezterm.action
     config.keys = { -- misc / useful
     {
+        key = "v",
+        mods = "CMD",
+        action = act.PasteFrom("Clipboard")
+    }, {
+        key = "c",
+        mods = "CMD",
+        action = act.CopyTo("Clipboard")
+    }, {
         key = "F2",
         mods = "NONE",
         action = act.ActivateCommandPalette
@@ -121,10 +129,21 @@ function M.setup(config)
         action = act.SendKey({
             key = "PageDown"
         })
+    }, -- Paste image from clipboard: saves to /tmp and pastes the file path
+    -- Requires: brew install pngpaste
+    -- Use CMD+CTRL+V when clipboard contains an image (e.g. screenshot)
+    {
+        key = "v",
+        mods = "CMD|CTRL",
+        action = wezterm.action_callback(function(window, pane)
+            local tmp = "/tmp/wezterm_img_" .. os.time() .. ".png"
+            local success, _, _ = wezterm.run_child_process({"pngpaste", tmp})
+            if success then
+                pane:send_text(tmp)
+            else
+                window:toast_notification("WezTerm", "No image in clipboard", nil, 2000)
+            end
+        end)
     }}
-
-    -- Load the custom demo palette plugin
-    local demo_palette = require('config.plugins.demo_palette')
-    demo_palette.setup(config)
 end
 return M

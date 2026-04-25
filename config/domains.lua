@@ -27,15 +27,6 @@ function M.setup(config)
             identityfile = "~/.ssh/ssh-key-174.key"
         }
         -- multiplexing = "WezTerm"
-    }, {
-        name = "ceshi@oracle",
-        remote_address = "137.131.60.151",
-        username = "ubuntu",
-        multiplexing = "None",
-        ssh_option = {
-            identityfile = "~/.ssh/ssh-key-2025-11-13.key"
-        }
-        -- multiplexing = "WezTerm"
     }}
 end
 
