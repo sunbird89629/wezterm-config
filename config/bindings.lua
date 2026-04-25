@@ -55,7 +55,10 @@ function M.setup(config)
     {
         key = "v",
         mods = "CMD",
-        action = act.PasteFrom("Clipboard")
+        action = wezterm.action_callback(function(window, pane)
+            local image_paste = require("config.plugins.image_paste")
+            image_paste.smart_paste(window, pane)
+        end)
     }, {
         key = "c",
         mods = "CMD",
@@ -129,21 +132,6 @@ function M.setup(config)
         action = act.SendKey({
             key = "PageDown"
         })
-    }, -- Paste image from clipboard: saves to /tmp and pastes the file path
-    -- Requires: brew install pngpaste
-    -- Use CMD+CTRL+V when clipboard contains an image (e.g. screenshot)
-    {
-        key = "v",
-        mods = "CMD|CTRL",
-        action = wezterm.action_callback(function(window, pane)
-            local tmp = "/tmp/wezterm_img_" .. os.time() .. ".png"
-            local success, _, _ = wezterm.run_child_process({"pngpaste", tmp})
-            if success then
-                pane:send_text(tmp)
-            else
-                window:toast_notification("WezTerm", "No image in clipboard", nil, 2000)
-            end
-        end)
     }}
 end
 return M
