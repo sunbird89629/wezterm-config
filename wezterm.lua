@@ -11,6 +11,8 @@ config.check_for_updates_interval_seconds = 86400
 
 -- 基础样式配置
 require("config.appearance").setup(config)
+-- 字体配置
+require("config.fonts").setup(config)
 -- Window focus styling
 -- require("events.window-focus").setup()
 -- Set input method when a new window is first focused
@@ -28,7 +30,7 @@ require("config.plugins.quick_domains").setup(config)
 -- require("config.plugins.quota_limit").setup(config)
 -- require("config.plugins.ai_helper").setup(config)
 -- require("config.plugins.temp_demo_menu").setup(config)
-require("config.plugins.temp_edit").setup(config)
+-- require("config.plugins.temp_edit").setup(config)
 -- require("config.plugins.modal").setup(config)
 
 -- 继承官方默认 key_tables（关键：否则你自己写 copy_mode 会覆盖默认）

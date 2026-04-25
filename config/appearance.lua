@@ -7,7 +7,6 @@ local function config_base_style(config)
     -- config.macos_window_background_blur = 80
     config.window_close_confirmation = "NeverPrompt"
     config.default_cursor_style = "BlinkingBar"
-    config.font_size = 22
     -- config.color_scheme = "Marrakesh (light) (terminal.sexy)"
     -- config.color_scheme = 'Monokai Pro Ristretto (Gogh)'
     -- config.color_scheme = 'Material'
@@ -50,21 +49,21 @@ local function config_tab_bar_style(config)
     -- config.use_fancy_tab_bar = false
     config.underline_thickness = "2px"
     config.colors = {
-        -- Overrides for the Command Palette / Input Selector
-        -- Making it visually distinct with a dark modal feel even if theme is light
-        quick_select_label_bg = {
-            Color = "#fab387"
-        },
-        quick_select_label_fg = {
-            Color = "#1e1e2e"
-        },
+        -- 命令面板整体背景与前景
+        command_palette_bg_color = "#11111b", -- 更深的黑色背景
+        command_palette_fg_color = "#ffffff", -- 纯白文字
 
-        -- Since WezTerm doesn't have a simple "command_palette_bg" key in the colors table 
-        -- (it uses the color scheme's background), we can't easily force it dark 
-        -- without changing the whole scheme or using complex overrides.
-        -- But we can ensure the selection highlights are nice.
-        selection_bg = "#483b5b",
-        selection_fg = "#ffffff",
+        -- 搜索匹配的高亮（保持醒目）
+        quick_select_label_bg = { Color = "#f9e2af" }, -- 亮黄色
+        quick_select_label_fg = { Color = "#11111b" },
+
+        -- 选中项的高亮（大幅提升对比度）
+        -- 这里使用明亮的蓝色或紫色背景，让选中状态极其明显
+        selection_bg = "#585b70", -- 较浅的灰色背景作为次级区分
+        -- 注意：WezTerm 的命令面板选中行通常使用 selection_bg
+        -- 为了绝对的对比度，我们可以尝试更鲜艳的颜色
+        selection_bg = "#89b4fa", -- 明亮的蓝色
+        selection_fg = "#11111b", -- 选中行使用深色文字
 
         split = "#5d7cff",
         tab_bar = {
@@ -97,10 +96,9 @@ local function config_tab_bar_style(config)
 end
 
 local function config_cammand_palette_style(config)
-    -- config.command_palette_font = wezterm.font("JetBrains Mono")
-    config.command_palette_font_size = 22
-    config.command_palette_rows = 28
-    config.command_palette_bg_color = "#231c27"
+    config.command_palette_rows = 12
+    config.command_palette_bg_color = "#11111b"
+    config.command_palette_fg_color = "#ffffff"
 end
 
 function M.setup(config)
