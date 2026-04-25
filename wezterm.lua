@@ -27,6 +27,8 @@ require("config.bindings").setup(config)
 require("config.domains").setup(config)
 -- Hyperlink rules
 require("config.hyperlinks").setup(config)
+-- Command palette
+require("config.command_palette").setup(config)
 -- Plugins
 -- require("config.plugins.bar").setup(config)
 require("config.plugins.tabline").setup(config)

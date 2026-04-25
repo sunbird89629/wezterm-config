@@ -30,9 +30,9 @@ local function config_tab_bar_style(config)
         Color = "#11111b"
     }
 
-    -- Selection colors
-    config.colors.selection_bg = "#89b4fa"
-    config.colors.selection_fg = "#11111b"
+    -- Selection colors (Affects both terminal selection and command palette highlighted item)
+    config.colors.selection_bg = "#58a6ff" -- 明亮的蓝色
+    config.colors.selection_fg = "#0d1117" -- 深色文字以保持对比度
 
     -- Split color
     config.colors.split = "#5d7cff"
@@ -66,25 +66,8 @@ local function config_tab_bar_style(config)
     }
 end
 
-local function config_cammand_palette_style(config)
-    -- command_palette_bg_color
-    -- command_palette_fg_color
-    -- command_palette_font
-    -- command_palette_font_size
-    -- command_palette_rows
-
-    config.command_palette_rows = 30
-
-    config.colors = config.colors or {}
-    config.colors.command_palette = {
-        bg = "#11111b",
-        fg = "#ffffff"
-    }
-end
-
 function M.setup(config)
     config_base_style(config)
     config_tab_bar_style(config)
-    config_cammand_palette_style(config)
 end
 return M
