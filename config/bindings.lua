@@ -1,4 +1,5 @@
 local wezterm = require("wezterm")
+local process = require("utils.process")
 local M = {}
 
 local function copy_last_command_output(window, pane)
@@ -62,7 +63,14 @@ function M.setup(config)
     }, {
         key = "c",
         mods = "CMD",
-        action = act.CopyTo("Clipboard")
+        action = wezterm.action_callback(function(window, pane)
+            local sel = window:get_selection_text_for_pane(pane)
+            if (sel and sel ~= "") or not process.foreground_matches(pane, { "claude" }) then
+                window:perform_action(act.CopyTo("Clipboard"), pane)
+                return
+            end
+            window:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), pane)
+        end)
     }, {
         key = "F2",
         mods = "NONE",
@@ -107,6 +115,10 @@ function M.setup(config)
         key = "L",
         mods = "CMD|SHIFT",
         action = wezterm.action_callback(copy_last_command_output)
+    }, {
+        key = "k",
+        mods = "CMD",
+        action = act.ClearScrollback("ScrollbackAndViewport")
     }, -- Send standard navigation keys for Cmd+Arrows
     {
         key = "LeftArrow",
