@@ -1,7 +1,7 @@
 local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
-config.automatically_reload_config = true
+config.automatically_reload_config = false
 config.scrollback_lines = 20000
 config.exit_behavior = 'CloseOnCleanExit'
 config.audible_bell = 'Disabled'
