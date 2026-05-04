@@ -15,12 +15,14 @@ config.check_for_updates_interval_seconds = 86400
 
 -- 基础样式配置
 require("config.styles.appearance").setup(config)
+-- Tab 栏配置
+require("config.styles.tab").setup(config)
 -- 字体配置
 require("config.styles.fonts").setup(config)
 -- Window focus styling
--- require("events.window-focus").setup()
+-- require("config.events.window-focus").setup()
 -- Set input method when a new window is first focused
-require("events.input-method").setup()
+require("config.events.input-method").setup()
 -- 快捷键配置
 require("config.behaviors.bindings").setup(config)
 -- SSH domains
