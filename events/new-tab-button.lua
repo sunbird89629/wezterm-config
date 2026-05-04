@@ -1,6 +1,6 @@
 local wezterm = require('wezterm')
 local launch_menu = require('config.launch').launch_menu
-local domains = require('config.domains')
+local domains = require('config.behaviors.domains')
 local Cells = require('utils.cells')
 
 local nf = wezterm.nerdfonts

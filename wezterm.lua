@@ -14,24 +14,24 @@ config.selection_word_boundary = " \t\n{}[]()\"'`"
 config.check_for_updates_interval_seconds = 86400
 
 -- 基础样式配置
-require("config.appearance").setup(config)
+require("config.styles.appearance").setup(config)
 -- 字体配置
-require("config.fonts").setup(config)
+require("config.styles.fonts").setup(config)
 -- Window focus styling
 -- require("events.window-focus").setup()
 -- Set input method when a new window is first focused
 require("events.input-method").setup()
 -- 快捷键配置
-require("config.bindings").setup(config)
+require("config.behaviors.bindings").setup(config)
 -- SSH domains
-require("config.domains").setup(config)
+require("config.behaviors.domains").setup(config)
 -- Hyperlink rules
-require("config.hyperlinks").setup(config)
+require("config.behaviors.hyperlinks").setup(config)
 -- Command palette
-require("config.command_palette").setup(config)
+require("config.styles.command_palette").setup(config)
 -- Plugins
 -- require("config.plugins.bar").setup(config)
-require("config.plugins.tabline").setup(config)
+-- require("config.plugins.tabline").setup(config)
 require("config.plugins.replay").setup(config)
 require("config.plugins.toggle_terminal").setup(config)
 require("config.plugins.quick_domains").setup(config)
