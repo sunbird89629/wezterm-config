@@ -7,10 +7,10 @@ function M.setup(config)
     config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
 
     config.window_padding = {
-        left = 30,
-        right = 30,
-        top = 30,
-        bottom = 30
+        left = 4,
+        right = 4,
+        top = 4,
+        bottom = 4
     }
 end
 

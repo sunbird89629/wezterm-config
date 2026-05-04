@@ -8,10 +8,7 @@ function M.setup(config)
     config.command_palette_bg_color = '#11111b'
     config.command_palette_fg_color = '#ffffff'
 
-    config.command_palette_font = wezterm.font_with_fallback({
-        { family = 'JetBrainsMono Nerd Font', weight = 'Medium' },
-        { family = 'Sarasa Term SC' },
-    })
+    config.command_palette_font = wezterm.font("JetBrainsMono Nerd Font", { weight = "Medium" })
 end
 
 return M

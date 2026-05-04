@@ -17,19 +17,19 @@ function M.setup(config)
             remember_zoomed = true
         }
     })
-    toggle_terminal.apply_to_config(config, {
-        key = "l", -- 使用 'j' 键
-        mods = "CMD", -- 使用 CMD 键 (CMD + j)
-        direction = "Right", -- 底部弹出 (修正为 "Down")
-        size = {
-            Percent = 30
-        }, -- 占用 60% 高度
-        zoom = {
-            auto_zoom_toggle_terminal = false,
-            auto_zoom_invoker_pane = true,
-            remember_zoomed = true
-        }
-    })
+    -- toggle_terminal.apply_to_config(config, {
+    --     key = "l", -- 使用 'j' 键
+    --     mods = "CMD", -- 使用 CMD 键 (CMD + j)
+    --     direction = "Right", -- 底部弹出 (修正为 "Down")
+    --     size = {
+    --         Percent = 30
+    --     }, -- 占用 60% 高度
+    --     zoom = {
+    --         auto_zoom_toggle_terminal = false,
+    --         auto_zoom_invoker_pane = true,
+    --         remember_zoomed = true
+    --     }
+    -- })
 end
 
 return M

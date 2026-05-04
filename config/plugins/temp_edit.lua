@@ -1,5 +1,4 @@
 local wezterm = require("wezterm")
-local lib = wezterm.plugin.require("https://github.com/chrisgve/lib.wezterm")
 local time = wezterm.time
 local act = wezterm.action
 local mux = wezterm.mux
@@ -134,6 +133,7 @@ local function handle_pane_exit(window, pane)
 end
 
 local function trigger_nvim_edit()
+    local lib = wezterm.plugin.require("https://github.com/chrisgve/lib.wezterm")
     lib.file_io.write_file(TEMP_NVIM_FILE, "")
     local _, pane, window = mux.spawn_window({
         args = {"/bin/zsh", "-lic", "nvim " .. TEMP_NVIM_FILE}
@@ -194,7 +194,12 @@ local function open_yazi(window, pane)
         cwd = cwd,
         args = {'/opt/homebrew/bin/yazi'}
     })
-    apply_dialog_styling(new_window:gui_window())
+    local gui_win = new_window:gui_window()
+    gui_win:set_config_overrides({
+        colors = {
+            background = '#1a1145',
+        },
+    })
 end
 
 --------------------------------------------------------------------------------
