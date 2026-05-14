@@ -1,0 +1,85 @@
+<h2>WezTerm Tab 样式方案</h2>
+<p class="subtitle">点击选择你喜欢的风格</p>
+
+<div class="cards">
+  <!-- Style A: Minimal Underline -->
+  <div class="card" data-choice="minimal" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0f1a;padding:16px;border-radius:8px;font-family:monospace;">
+      <div style="display:flex;align-items:center;gap:0;border-bottom:2px solid #1a2135;padding-bottom:0;">
+        <div style="padding:6px 16px;color:#8a94aa;font-size:13px;cursor:pointer;">zsh</div>
+        <div style="padding:6px 16px;color:#e8f1ff;font-size:13px;border-bottom:2px solid #89b4fa;margin-bottom:-2px;font-weight:600;cursor:pointer;">nvim</div>
+        <div style="padding:6px 16px;color:#8a94aa;font-size:13px;cursor:pointer;">lazygit</div>
+        <div style="padding:6px 16px;color:#5d7cff;font-size:13px;cursor:pointer;">+</div>
+      </div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;color:#8a94aa;font-size:12px;">
+        终端内容区域
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 极简下划线</h3>
+      <p>活动 tab 用底部亮色线条标识，无背景变化。干净利落，适合喜欢简约风格的用户。</p>
+    </div>
+  </div>
+
+  <!-- Style B: Pill Capsule -->
+  <div class="card" data-choice="pill" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0f1a;padding:16px;border-radius:8px;font-family:monospace;">
+      <div style="display:flex;align-items:center;gap:4px;padding:4px 8px;">
+        <div style="padding:5px 14px;color:#8a94aa;font-size:13px;border-radius:6px;cursor:pointer;">zsh</div>
+        <div style="padding:5px 14px;color:#e8f1ff;font-size:13px;background:#263859;border-radius:6px;font-weight:600;cursor:pointer;">nvim</div>
+        <div style="padding:5px 14px;color:#8a94aa;font-size:13px;border-radius:6px;cursor:pointer;">lazygit</div>
+        <div style="padding:5px 14px;color:#5d7cff;font-size:13px;border-radius:6px;cursor:pointer;">+</div>
+      </div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;color:#8a94aa;font-size:12px;">
+        终端内容区域
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 胶囊/Pill</h3>
+      <p>活动 tab 有圆角背景色块，类似 VS Code 风格。层次分明，辨识度高。</p>
+    </div>
+  </div>
+
+  <!-- Style C: Gradient Glow -->
+  <div class="card" data-choice="gradient" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0f1a;padding:16px;border-radius:8px;font-family:monospace;">
+      <div style="display:flex;align-items:center;gap:2px;padding:6px 10px;">
+        <div style="padding:5px 14px;color:#6b7280;font-size:13px;cursor:pointer;">zsh</div>
+        <div style="padding:5px 14px;color:#f0f6ff;font-size:13px;background:linear-gradient(135deg,#1e3a5f,#2d5a8e);border-radius:4px;font-weight:600;box-shadow:0 0 12px rgba(89,130,255,0.3);cursor:pointer;">nvim</div>
+        <div style="padding:5px 14px;color:#6b7280;font-size:13px;cursor:pointer;">lazygit</div>
+        <div style="padding:5px 14px;color:#4a6fa5;font-size:13px;cursor:pointer;">+</div>
+      </div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:12px;">
+        终端内容区域
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 渐变发光</h3>
+      <p>活动 tab 使用渐变背景 + 微光效果。科技感强，适合深色主题爱好者。</p>
+    </div>
+  </div>
+
+  <!-- Style D: Powerline -->
+  <div class="card" data-choice="powerline" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0c0f1a;padding:16px;border-radius:8px;font-family:monospace;">
+      <div style="display:flex;align-items:center;gap:0;padding:0 8px;">
+        <div style="display:flex;align-items:center;">
+          <span style="padding:5px 12px 5px 14px;color:#8a94aa;font-size:13px;background:#121725;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%);padding-right:20px;">zsh</span>
+        </div>
+        <div style="display:flex;align-items:center;margin-left:-8px;">
+          <span style="padding:5px 12px 5px 14px;color:#e8f1ff;font-size:13px;background:#263859;font-weight:600;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%,8px 0);padding-right:20px;padding-left:18px;">nvim</span>
+        </div>
+        <div style="display:flex;align-items:center;margin-left:-8px;">
+          <span style="padding:5px 12px 5px 18px;color:#8a94aa;font-size:13px;background:#121725;">lazygit</span>
+        </div>
+      </div>
+      <div style="height:120px;display:flex;align-items:center;justify-content:center;color:#8a94aa;font-size:12px;margin-top:4px;">
+        终端内容区域
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D. Powerline 箭头</h3>
+      <p>经典 Powerline 箭头分隔符，Vim/终端玩家的最爱。复古但有辨识度。</p>
+    </div>
+  </div>
+</div>

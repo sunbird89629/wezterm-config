@@ -43,7 +43,7 @@ function M.setup(config)
                 enabled = false
             },
             hostname = {
-                enabled = true
+                enabled = false
             },
             clock = {
                 enabled = false

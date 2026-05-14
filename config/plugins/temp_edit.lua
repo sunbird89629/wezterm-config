@@ -123,6 +123,7 @@ local TEMP_NVIM_FILE = "/tmp/wezterm_temp_file.txt"
 -- Read temp file and push its content to clipboard, then clean up.
 local function handle_pane_exit(window, pane)
     wezterm.run_child_process({"/bin/sh", "-c", "/usr/bin/pbcopy < " .. TEMP_NVIM_FILE})
+    os.remove(TEMP_NVIM_FILE)
     if window and pane then
         pcall(function()
             window:perform_action(act.CloseCurrentTab({
@@ -143,7 +144,7 @@ local function trigger_nvim_edit()
     apply_dialog_styling(gui_window)
 
     local pane_id = pane:pane_id()
-    set_interval(0.2, function()
+    set_interval(0.5, function()
         local ok, live_pane = pcall(mux.get_pane, pane_id)
         if ok and live_pane then
             return true
@@ -190,16 +191,10 @@ end
 
 local function open_yazi(window, pane)
     local cwd = get_pane_cwd(pane)
-    local _, _, new_window = mux.spawn_window({
+    window:perform_action(act.SpawnCommandInNewTab {
         cwd = cwd,
         args = {'/opt/homebrew/bin/yazi'}
-    })
-    local gui_win = new_window:gui_window()
-    gui_win:set_config_overrides({
-        colors = {
-            background = '#1a1145',
-        },
-    })
+    }, pane)
 end
 
 --------------------------------------------------------------------------------
@@ -335,15 +330,18 @@ local function build_palette_label(cmd, width)
     }})
 end
 
-function M.activate_palette(window, pane)
-    local choices = {}
+local PALETTE_CHOICES = (function()
+    local t = {}
     for _, cmd in ipairs(PALETTE_COMMANDS) do
-        table.insert(choices, {
+        table.insert(t, {
             id = cmd.id,
             label = build_palette_label(cmd, 80)
         })
     end
+    return t
+end)()
 
+function M.activate_palette(window, pane)
     window:perform_action(act.InputSelector {
         title = wezterm.format({{
             Attribute = {
@@ -356,7 +354,7 @@ function M.activate_palette(window, pane)
         }, {
             Text = '   Command Palette '
         }}),
-        choices = choices,
+        choices = PALETTE_CHOICES,
         fuzzy = false,
         action = wezterm.action_callback(function(win, p, id, label)
             if not id then

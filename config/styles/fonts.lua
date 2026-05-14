@@ -15,6 +15,9 @@ function M.setup(config)
         family = "Sarasa Term SC"
     }})
     config.font_size = font_size
+    config.window_frame = {
+        font_size = 16,
+    }
 
     -- config.treat_east_asian_ambiguous_width_as_wide = true
 

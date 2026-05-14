@@ -18,6 +18,12 @@ function M.setup(config)
       format = 'vscode://file$1:$2:$3',
    })
 
+   -- 裸相对路径跳转 (通过 open-uri 事件用 pane CWD 补全，$2/$3 缺失时产生尾部冒号，由处理器清理)
+   table.insert(rules, {
+      regex = [=[(?:^|\s)((?:[a-zA-Z0-9_.][a-zA-Z0-9_.-]*/)+[a-zA-Z0-9_.][a-zA-Z0-9_.-]*)(?::(\d+)(?::(\d+))?)?(?=\s|$|[,;)])]=],
+      format = 'wezterm-open://$1:$2:$3',
+   })
+
    -- 3. 处理被各种括号包裹的 URL
    -- (URL)
    table.insert(rules, {

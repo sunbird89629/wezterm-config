@@ -8,6 +8,7 @@ function M.setup(config)
         options = {
             icons_enabled = true,
             theme = 'GruvboxDark',
+            tab_font_size = 16,
             -- tabs_enabled = true,
             -- section_separators = {
             --     left = '',

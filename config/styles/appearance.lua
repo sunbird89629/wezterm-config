@@ -6,9 +6,11 @@ function M.setup(config)
     config.color_scheme = 'Abernathy'
     config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
     config.inactive_pane_hsb = {
-        saturation = 0.4, -- 饱和度倍数（1.0 = 不变）
-        brightness = 0.4 -- 亮度倍数（越小越暗）
+        saturation = 0.4,
+        brightness = 0.4
     }
+
+    config.colors = config.colors or {}
     config.colors.split = "#FF4444"
 
     config.window_padding = {

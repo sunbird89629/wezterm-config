@@ -2,8 +2,8 @@ local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
 config.automatically_reload_config = false
-config.scrollback_lines = 20000
-config.exit_behavior = 'CloseOnCleanExit'
+config.scrollback_lines = 10000
+config.exit_behavior = 'Close'
 config.audible_bell = 'Disabled'
 config.status_update_interval = 1000
 config.debug_key_events = false
@@ -29,10 +29,12 @@ require("config.behaviors.bindings").setup(config)
 require("config.behaviors.domains").setup(config)
 -- Hyperlink rules
 require("config.behaviors.hyperlinks").setup(config)
+-- 相对路径 open-uri 处理（wezterm-open:// → vscode://file + pane CWD）
+require("config.events.open-uri").setup()
 -- Command palette
 require("config.styles.command_palette").setup(config)
 -- Plugins
--- require("config.plugins.bar").setup(config)
+require("config.plugins.bar").setup(config)
 -- require("config.plugins.tabline").setup(config)
 require("config.plugins.replay").setup(config)
 require("config.plugins.toggle_terminal").setup(config)
