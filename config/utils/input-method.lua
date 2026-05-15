@@ -15,13 +15,11 @@ function M.switch_to_english()
     table.insert(candidates, "im-select")
 
     for _, im_select in ipairs(candidates) do
-        local ok, success, _, stderr = pcall(wezterm.run_child_process, {im_select, ENGLISH_INPUT_ID})
-        if ok and success then
+        local ok, result = pcall(wezterm.run_child_process, {im_select, ENGLISH_INPUT_ID})
+        if ok then
             return
         end
-        if ok and stderr and stderr ~= "" then
-            wezterm.log_error("im-select error: " .. stderr)
-        end
+        wezterm.log_error("im-select failed: " .. tostring(result))
     end
 
     wezterm.log_error("Failed to switch input method; set IM_SELECT or fix PATH.")
