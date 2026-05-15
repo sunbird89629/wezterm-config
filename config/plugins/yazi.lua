@@ -1,6 +1,7 @@
 local wezterm = require("wezterm")
 local act = wezterm.action
 local os = require("os")
+local switch_to_english = require("config.utils.input-method").switch_to_english
 
 local M = {}
 
@@ -44,7 +45,7 @@ end
 
 local function make_open_fn(opts)
     return function(window, pane)
-        require("config.utils.input-method").switch_to_english()
+        switch_to_english()
         local cwd = get_pane_cwd(pane)
         local env = { PATH = build_path(opts.extra_paths) }
         if opts.log_level then
