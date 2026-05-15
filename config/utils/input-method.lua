@@ -19,7 +19,7 @@ function M.switch_to_english()
         if ok then
             return
         end
-        wezterm.log_error("im-select failed: " .. tostring(result))
+        wezterm.log_info("im-select not found: " .. tostring(result))
     end
 
     wezterm.log_error("Failed to switch input method; set IM_SELECT or fix PATH.")
