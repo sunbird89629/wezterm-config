@@ -39,6 +39,7 @@ end
 
 local function make_open_fn(opts)
     return function(window, pane)
+        require("config.utils.input-method").switch_to_english()
         local cwd = get_pane_cwd(pane)
         window:perform_action(act.SpawnCommandInNewTab {
             cwd  = cwd,
