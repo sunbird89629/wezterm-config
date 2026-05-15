@@ -5,12 +5,11 @@ local M = {}
 
 function M.setup(config)
     -- Font configuration
-    local font_family = "JetBrainsMono Nerd Font"
+    local font_family = "JetBrainsMono Nerd Font Mono"
     local font_size = platform.is_mac and 23 or 9.75
 
     config.font = wezterm.font_with_fallback({{
         family = font_family,
-        weight = "Medium"
     }, {
         family = "Sarasa Term SC"
     }})
