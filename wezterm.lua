@@ -43,6 +43,7 @@ require("config.plugins.quick_domains").setup(config)
 require("config.plugins.ai_helper").setup(config)
 -- require("config.plugins.temp_demo_menu").setup(config)
 require("config.plugins.yazi").setup(config)
+require("config.plugins.lazygit").setup(config)
 require("config.plugins.temp_edit").setup(config)
 -- require("config.plugins.modal").setup(config)
 
