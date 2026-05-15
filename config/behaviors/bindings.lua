@@ -144,6 +144,10 @@ function M.setup(config)
         action = act.SendKey({
             key = "PageDown"
         })
+    }, {
+        key = "d",
+        mods = "CMD",
+        action = act.SplitHorizontal({ domain = "CurrentPaneDomain" })
     }}
 end
 return M
