@@ -75,7 +75,7 @@ Replace the entire file content with:
 
 ```lua
 local wezterm = require("wezterm")
-local im = require("utils.input-method")
+local im = require("config.utils.input-method")
 
 local M = {}
 
@@ -132,17 +132,17 @@ In `config/plugins/yazi.lua`, change line 47 from:
 ```
 to:
 ```lua
-        require("utils.input-method").switch_to_english()
+        require("config.utils.input-method").switch_to_english()
 ```
 
 - [ ] **Step 2: Add input method switch to lazygit**
 
-In `config/plugins/lazygit.lua`, in `make_open_fn`, add `require("utils.input-method").switch_to_english()` before `SpawnCommandInNewTab`:
+In `config/plugins/lazygit.lua`, in `make_open_fn`, add `require("config.utils.input-method").switch_to_english()` before `SpawnCommandInNewTab`:
 
 ```lua
 local function make_open_fn(opts)
     return function(window, pane)
-        require("utils.input-method").switch_to_english()
+        require("config.utils.input-method").switch_to_english()
         local cwd = get_pane_cwd(pane)
         window:perform_action(act.SpawnCommandInNewTab {
             cwd  = cwd,

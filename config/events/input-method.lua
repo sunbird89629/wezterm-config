@@ -1,5 +1,5 @@
 local wezterm = require("wezterm")
-local im = require("utils.input-method")
+local im = require("config.utils.input-method")
 
 local M = {}
 
