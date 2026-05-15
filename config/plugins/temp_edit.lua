@@ -191,9 +191,15 @@ end
 
 local function open_yazi(window, pane)
     local cwd = get_pane_cwd(pane)
+    local path = os.getenv("PATH") or ""
+    -- SpawnCommandInNewTab 不走 shell 初始化，手动补全 PATH 确保 fzf 等工具可见
+    if not path:find("/opt/homebrew/bin", 1, true) then
+        path = "/opt/homebrew/bin:/opt/homebrew/sbin:" .. path
+    end
     window:perform_action(act.SpawnCommandInNewTab {
         cwd = cwd,
-        args = {'/opt/homebrew/bin/yazi'}
+        args = {'/opt/homebrew/bin/yazi'},
+        set_environment_variables = { PATH = path }
     }, pane)
 end
 
