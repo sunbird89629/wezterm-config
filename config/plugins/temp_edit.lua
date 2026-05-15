@@ -4,6 +4,7 @@ local act = wezterm.action
 local mux = wezterm.mux
 local io = require("io")
 local os = require("os")
+local yazi = require("config.plugins.yazi")
 
 local M = {}
 
@@ -38,33 +39,6 @@ local function set_window_override(window, k, v)
     local o = window:get_config_overrides() or {}
     o[k] = v
     window:set_config_overrides(o)
-end
-
-local function get_pane_cwd(pane)
-    local cwd = pane:get_current_working_dir()
-    if not cwd then
-        return nil
-    end
-
-    -- New version might be a Url object
-    if type(cwd) == 'userdata' or type(cwd) == 'table' then
-        return cwd.file_path
-    end
-
-    -- Old version is URI string
-    if type(cwd) == 'string' and wezterm.url and wezterm.url.parse then
-        local ok, url = pcall(wezterm.url.parse, cwd)
-        if ok and url and url.file_path then
-            return url.file_path
-        end
-    end
-
-    -- Fallback: strip file:// prefix
-    if type(cwd) == 'string' then
-        return (cwd:gsub('^file://[^/]*', ''))
-    end
-
-    return nil
 end
 
 local function get_active_screen()
@@ -187,17 +161,6 @@ local function trigger_cmd_edit(window, pane)
         end
         return true
     end)
-end
-
-local function open_yazi(window, pane)
-    local cwd = get_pane_cwd(pane)
-    -- SpawnCommandInNewTab 不走 shell 初始化，前插常用工具目录确保 fzf/code 等可见
-    local path = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:" .. (os.getenv("PATH") or "")
-    window:perform_action(act.SpawnCommandInNewTab {
-        cwd = cwd,
-        args = {'/opt/homebrew/bin/yazi'},
-        set_environment_variables = { PATH = path, YAZI_LOG = "debug" }
-    }, pane)
 end
 
 --------------------------------------------------------------------------------
@@ -390,6 +353,8 @@ function M.activate_palette(window, pane)
                         end
                     end)
                 }, p)
+            elseif id == 'file' then
+                win:perform_action(yazi.action, p)
             else
                 win:toast_notification('Demo', 'Selected: ' .. label, nil, 2000)
             end
@@ -440,13 +405,6 @@ function M.setup(config)
 
     -- Command+E: Quick Edit Selector
     table.insert(config.keys, QUICK_EDIT_BINDING)
-
-    -- Command+Shift+O: Open Yazi
-    table.insert(config.keys, {
-        key = "O",
-        mods = "CMD|SHIFT",
-        action = wezterm.action_callback(open_yazi)
-    })
 end
 
 return M
