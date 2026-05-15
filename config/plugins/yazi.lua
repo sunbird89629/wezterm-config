@@ -32,11 +32,14 @@ end
 
 local function resolve_opts(opts)
     opts = opts or {}
-    return {
+    local resolved = {
         binary      = opts.binary      or DEFAULTS.binary,
-        log_level   = opts.log_level,
         extra_paths = opts.extra_paths or DEFAULTS.extra_paths,
     }
+    if opts.log_level then
+        resolved.log_level = opts.log_level
+    end
+    return resolved
 end
 
 local function make_open_fn(opts)
