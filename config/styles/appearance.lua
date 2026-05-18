@@ -1,10 +1,11 @@
 local M = {}
 
 function M.setup(config)
+    config.window_background_opacity = 0.9
+    config.macos_window_background_blur = 40
     config.window_close_confirmation = "NeverPrompt"
     config.default_cursor_style = "BlinkingBar"
     config.color_scheme = 'Abernathy'
-    config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS"
     config.inactive_pane_hsb = {
         saturation = 0.4,
         brightness = 0.4
