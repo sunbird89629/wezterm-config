@@ -5,6 +5,8 @@ local switch_to_english = require('config.utils.input-method').switch_to_english
 
 local M = {}
 
+local _initialized = false
+
 local MAX_SEEN = 50
 
 local DEFAULTS = {
@@ -20,6 +22,8 @@ local function resolve_opts(opts)
 end
 
 function M.setup(config, opts)
+   if _initialized then return end
+   _initialized = true
    local resolved = resolve_opts(opts)
    local log = Logger.new('input_method', resolved.verbose)
    local seen_windows = {}
@@ -38,6 +42,7 @@ function M.setup(config, opts)
          return
       end
       if seen_count >= MAX_SEEN then
+         -- Simple cap: accept one re-trigger per window after reset.
          seen_windows = {}
          seen_count = 0
          log.info('seen_windows reset')
