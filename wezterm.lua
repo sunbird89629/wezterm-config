@@ -1,6 +1,9 @@
 local wezterm = require("wezterm") ---@type Wezterm
 local act = wezterm.action
 local config = wezterm.config_builder() ---@type Config
+-- config.window_decorations = 'RESIZE|MACOS_FORCE_DISABLE_SHADOW'
+-- config.font_size = 20
+config.window_decorations = "RESIZE|MACOS_FORCE_SQUARE_CORNERS|MACOS_FORCE_DISABLE_SHADOW"
 config.automatically_reload_config = false
 config.scrollback_lines = 10000
 config.exit_behavior = 'Close'
@@ -12,7 +15,6 @@ config.initial_cols = 120
 config.check_for_updates = false
 config.selection_word_boundary = " \t\n{}[]()\"'`"
 config.check_for_updates_interval_seconds = 86400
-
 -- 基础样式配置
 require("config.styles.appearance").setup(config)
 -- Tab 栏配置
@@ -21,8 +23,6 @@ require("config.styles.tab").setup(config)
 require("config.styles.fonts").setup(config)
 -- Window focus styling
 -- require("config.events.window-focus").setup()
--- Set input method when a new window is first focused
-require("config.plugins.input_method").setup(config)
 -- 快捷键配置
 require("config.behaviors.bindings").setup(config)
 -- SSH domains
@@ -33,6 +33,8 @@ require("config.behaviors.hyperlinks").setup(config)
 require("config.events.open-uri").setup()
 -- Command palette
 require("config.styles.command_palette").setup(config)
+-- Input method: switch to English on new tab (CMD+T)
+require("config.plugins.input_method").setup(config)
 -- Plugins
 require("config.plugins.bar").setup(config)
 -- require("config.plugins.tabline").setup(config)

@@ -1,4 +1,5 @@
 local wezterm = require("wezterm")
+local act = wezterm.action
 local switch_to_english = require("config.utils.input-method").switch_to_english
 
 local M = {}
@@ -35,6 +36,25 @@ function M.setup(config, opts)
         seen_count = seen_count + 1
         switch_to_english()
     end)
+
+    -- Switch to English when opening a new tab
+    table.insert(config.keys, {
+        key = 't',
+        mods = 'CMD',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.SpawnTab('CurrentPaneDomain'), pane)
+        end),
+    })
+    -- Switch to English when opening the command palette
+    table.insert(config.keys, {
+        key = 'P',
+        mods = 'CMD|SHIFT',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.ActivateCommandPalette, pane)
+        end),
+    })
 end
 
 return M
