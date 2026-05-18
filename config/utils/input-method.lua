@@ -19,7 +19,7 @@ function M.switch_to_english(log)
       if ok then
          return
       end
-      log.info('im-select not found: ' .. tostring(result))
+      log.info('im-select attempt failed: ' .. tostring(result))
    end
 
    log.error('Failed to switch input method; set IM_SELECT or fix PATH.')
