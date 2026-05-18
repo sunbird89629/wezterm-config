@@ -55,6 +55,39 @@ function M.setup(config, opts)
             window:perform_action(act.ActivateCommandPalette, pane)
         end),
     })
+    -- Switch to English when opening launchers / selectors
+    table.insert(config.keys, {
+        key = 'F3',
+        mods = 'NONE',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.ShowLauncher, pane)
+        end),
+    })
+    table.insert(config.keys, {
+        key = 'F4',
+        mods = 'NONE',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.ShowLauncherArgs({ flags = 'FUZZY|TABS' }), pane)
+        end),
+    })
+    table.insert(config.keys, {
+        key = 'F5',
+        mods = 'NONE',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.ShowLauncherArgs({ flags = 'FUZZY|WORKSPACES' }), pane)
+        end),
+    })
+    table.insert(config.keys, {
+        key = 's',
+        mods = 'CMD',
+        action = wezterm.action_callback(function(window, pane)
+            switch_to_english()
+            window:perform_action(act.PaneSelect, pane)
+        end),
+    })
 end
 
 return M

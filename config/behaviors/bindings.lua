@@ -72,10 +72,6 @@ function M.setup(config)
             window:perform_action(act.SendKey({ key = "c", mods = "CTRL" }), pane)
         end)
     }, {
-        key = "F2",
-        mods = "NONE",
-        action = act.ActivateCommandPalette
-    }, {
         key = "F3",
         mods = "NONE",
         action = act.ShowLauncher
