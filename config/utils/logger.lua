@@ -3,7 +3,7 @@ local wezterm = require('wezterm')
 local Logger = {}
 
 function Logger.new(name, enabled)
-   local prefix = '[' .. name .. '] '
+   local prefix = '[' .. tostring(name) .. '] '
    if not enabled then
       return { info = function() end, error = function() end }
    end
