@@ -7,3 +7,4 @@ max_comment_line_length = 200
 ignore = {'241'}
 
 files['utils/backdrops.lua'] = { ignore = {'212'} }
+files['config/plugins/input_method.lua'] = { ignore = {'212'} }

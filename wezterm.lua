@@ -22,7 +22,7 @@ require("config.styles.fonts").setup(config)
 -- Window focus styling
 -- require("config.events.window-focus").setup()
 -- Set input method when a new window is first focused
-require("config.events.input-method").setup()
+require("config.plugins.input_method").setup(config)
 -- 快捷键配置
 require("config.behaviors.bindings").setup(config)
 -- SSH domains
